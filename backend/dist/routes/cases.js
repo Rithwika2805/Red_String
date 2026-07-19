@@ -221,15 +221,27 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
             return res.status(400).json({ error: 'Invalid room location' });
         }
         // Traverse to search the node
+        // Traverse to search the node and check if any parent along the path is locked
         let targetNode = null;
-        const findNodeRecursively = (obj, id) => {
+        let isPathLocked = false;
+        let requiredKey = '';
+        let requiredPassword = false;
+        const findNodeAndCheckLocks = (obj, id, parentLocked = false, parentKey = '', parentPass = false) => {
+            const currentlyLocked = obj.locked && !((obj.requires_key && progress.inventory.includes(obj.requires_key)) ||
+                (obj.requires_password && progress.inventory.includes(obj.requires_password)));
+            const pathLockedNow = parentLocked || currentlyLocked;
+            const activeKey = parentKey || (currentlyLocked && obj.requires_key ? obj.requires_key : '');
+            const activePass = parentPass || (currentlyLocked && obj.requires_password ? true : false);
             if (obj.nodes && obj.nodes[id]) {
                 targetNode = obj.nodes[id];
+                isPathLocked = pathLockedNow;
+                requiredKey = activeKey;
+                requiredPassword = activePass;
                 return;
             }
             if (obj.nodes) {
                 Object.keys(obj.nodes).forEach((key) => {
-                    findNodeRecursively(obj.nodes[key], id);
+                    findNodeAndCheckLocks(obj.nodes[key], id, pathLockedNow, activeKey, activePass);
                 });
             }
         };
@@ -238,13 +250,22 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
         }
         else if (room.nodes) {
             Object.keys(room.nodes).forEach((key) => {
-                findNodeRecursively(room.nodes[key], nodeId);
+                findNodeAndCheckLocks(room.nodes[key], nodeId, false, '', false);
             });
         }
         if (!targetNode) {
             return res.status(404).json({ error: 'Investigation node not found' });
         }
-        // Check lock
+        // Check parent locks
+        if (isPathLocked) {
+            if (requiredKey) {
+                return res.status(403).json({ error: 'Locked', requiresKey: requiredKey });
+            }
+            if (requiredPassword) {
+                return res.status(403).json({ error: 'Locked', requiresPassword: true });
+            }
+        }
+        // Check target node locks
         if (targetNode.locked) {
             if (targetNode.requires_key) {
                 const hasKey = progress.inventory.includes(targetNode.requires_key);
@@ -263,7 +284,7 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
         const updatedInventory = [...progress.inventory];
         const updatedEvidence = [...progress.discovered_evidence];
         const updatedScenes = [...progress.unlocked_scenes];
-        let timeCost = targetNode.cost_minutes || 10;
+        let timeCost = targetNode.cost_minutes || (targetNode.is_red_herring ? 2 : 10);
         let unlockedMsg = '';
         if (targetNode.inventory_reward && !updatedInventory.includes(targetNode.inventory_reward)) {
             updatedInventory.push(targetNode.inventory_reward);
@@ -318,12 +339,13 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
        SET inventory = $1, discovered_evidence = $2, elapsed_time = $3, unlocked_scenes = $4
        WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, JSON.stringify(updatedScenes), userId, caseId]);
         res.json({
-            message: 'Node investigated successfully',
+            message: targetNode.is_red_herring ? targetNode.description : 'Node investigated successfully',
             unlockedMsg,
             timeElapsed: timeCost,
             inventory: updatedInventory,
             discovered_evidence: updatedEvidence,
-            current_time: updatedTime
+            current_time: updatedTime,
+            isRedHerring: !!targetNode.is_red_herring
         });
     }
     catch (error) {

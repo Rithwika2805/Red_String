@@ -340,7 +340,7 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
     const updatedInventory = [...progress.inventory];
     const updatedEvidence = [...progress.discovered_evidence];
     const updatedScenes = [...progress.unlocked_scenes];
-    let timeCost = targetNode.cost_minutes || 10;
+    let timeCost = targetNode.cost_minutes || (targetNode.is_red_herring ? 2 : 10);
     let unlockedMsg = '';
 
     if (targetNode.inventory_reward && !updatedInventory.includes(targetNode.inventory_reward)) {
@@ -413,12 +413,13 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
     );
 
     res.json({
-      message: 'Node investigated successfully',
+      message: targetNode.is_red_herring ? targetNode.description : 'Node investigated successfully',
       unlockedMsg,
       timeElapsed: timeCost,
       inventory: updatedInventory,
       discovered_evidence: updatedEvidence,
-      current_time: updatedTime
+      current_time: updatedTime,
+      isRedHerring: !!targetNode.is_red_herring
     });
   } catch (error) {
     next(error);
