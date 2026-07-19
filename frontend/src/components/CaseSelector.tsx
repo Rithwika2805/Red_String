@@ -44,8 +44,8 @@ export const CaseSelector: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const handleStart = async (caseId: string) => {
     if (activeCaseId === caseId) {
       // Just restore
-      await fetchProgress(caseId);
-      onClose();
+      const success = await fetchProgress(caseId);
+      if (success) onClose();
     } else {
       if (activeCaseId) {
         const confirmReset = window.confirm(
@@ -53,8 +53,8 @@ export const CaseSelector: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         );
         if (!confirmReset) return;
       }
-      await startCase(caseId);
-      onClose();
+      const success = await startCase(caseId);
+      if (success) onClose();
     }
   };
 

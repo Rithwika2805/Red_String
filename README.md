@@ -65,8 +65,3 @@ The game engine does not hardcode clues or suspect logic. All content is driven 
    npm run dev
    ```
    Open `http://localhost:3000` to play.
-
----
-
-## ⚖️ License
-This project is licensed under the MIT License.

@@ -81,13 +81,13 @@ router.post('/:caseId/start', authenticateToken, async (req: AuthRequest, res: R
     // Upsert user progress
     await query(
       `INSERT INTO user_progress (
-        user_id, case_id, case_type, current_time, randomized_variables, 
+        user_id, case_id, case_type, elapsed_time, randomized_variables, 
         inventory, discovered_evidence, discovered_contradictions, 
         unlocked_dialogues, unlocked_people, revealed_suspicion_meters, 
         unlocked_scenes, completed, score, ending_reached
       ) VALUES ($1, $2, $3, 0, $4, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, $5, '[]'::jsonb, $6, false, 0, null)
       ON CONFLICT (user_id, case_id) DO UPDATE SET
-        current_time = 0,
+        elapsed_time = 0,
         randomized_variables = $4,
         inventory = '[]'::jsonb,
         discovered_evidence = '[]'::jsonb,
@@ -224,6 +224,7 @@ router.get('/:caseId/progress', authenticateToken, async (req: AuthRequest, res:
     res.json({
       progress: {
         ...progress,
+        current_time: progress.elapsed_time,
         unlocked_people: updatedPeople,
         revealed_suspicion_meters: updatedRevealedMeters,
         suspicion_scores: calculatedSuspicion,
@@ -266,15 +267,33 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
     }
 
     // Traverse to search the node
+    // Traverse to search the node and check if any parent along the path is locked
     let targetNode: any = null;
-    const findNodeRecursively = (obj: any, id: string) => {
+    let isPathLocked = false;
+    let requiredKey = '';
+    let requiredPassword = false;
+
+    const findNodeAndCheckLocks = (obj: any, id: string, parentLocked = false, parentKey = '', parentPass = false) => {
+      const currentlyLocked = obj.locked && !(
+        (obj.requires_key && progress.inventory.includes(obj.requires_key)) ||
+        (obj.requires_password && progress.inventory.includes(obj.requires_password))
+      );
+      
+      const pathLockedNow = parentLocked || currentlyLocked;
+      const activeKey = parentKey || (currentlyLocked && obj.requires_key ? obj.requires_key : '');
+      const activePass = parentPass || (currentlyLocked && obj.requires_password ? true : false);
+
       if (obj.nodes && obj.nodes[id]) {
         targetNode = obj.nodes[id];
+        isPathLocked = pathLockedNow;
+        requiredKey = activeKey;
+        requiredPassword = activePass;
         return;
       }
+
       if (obj.nodes) {
         Object.keys(obj.nodes).forEach((key) => {
-          findNodeRecursively(obj.nodes[key], id);
+          findNodeAndCheckLocks(obj.nodes[key], id, pathLockedNow, activeKey, activePass);
         });
       }
     };
@@ -283,7 +302,7 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
       targetNode = room.nodes[nodeId];
     } else if (room.nodes) {
       Object.keys(room.nodes).forEach((key) => {
-        findNodeRecursively(room.nodes[key], nodeId);
+        findNodeAndCheckLocks(room.nodes[key], nodeId, false, '', false);
       });
     }
 
@@ -291,7 +310,17 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
       return res.status(404).json({ error: 'Investigation node not found' });
     }
 
-    // Check lock
+    // Check parent locks
+    if (isPathLocked) {
+      if (requiredKey) {
+        return res.status(403).json({ error: 'Locked', requiresKey: requiredKey });
+      }
+      if (requiredPassword) {
+        return res.status(403).json({ error: 'Locked', requiresPassword: true });
+      }
+    }
+
+    // Check target node locks
     if (targetNode.locked) {
       if (targetNode.requires_key) {
         const hasKey = progress.inventory.includes(targetNode.requires_key);
@@ -374,11 +403,11 @@ router.post('/:caseId/explore', authenticateToken, async (req: AuthRequest, res:
        updatedScenes.push('security_room');
     }
 
-    const updatedTime = progress.current_time + timeCost;
+    const updatedTime = progress.elapsed_time + timeCost;
 
     await query(
       `UPDATE user_progress 
-       SET inventory = $1, discovered_evidence = $2, current_time = $3, unlocked_scenes = $4
+       SET inventory = $1, discovered_evidence = $2, elapsed_time = $3, unlocked_scenes = $4
        WHERE user_id = $5 AND case_id = $6`,
       [JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, JSON.stringify(updatedScenes), userId, caseId]
     );
@@ -476,11 +505,11 @@ router.post('/:caseId/dialogue', authenticateToken, async (req: AuthRequest, res
       updatedUnlockedDialogues.push(statementCardId);
     }
 
-    const updatedTime = progress.current_time + timeCost;
+    const updatedTime = progress.elapsed_time + timeCost;
 
     await query(
       `UPDATE user_progress 
-       SET unlocked_dialogues = $1, inventory = $2, discovered_evidence = $3, current_time = $4
+       SET unlocked_dialogues = $1, inventory = $2, discovered_evidence = $3, elapsed_time = $4
        WHERE user_id = $5 AND case_id = $6`,
       [JSON.stringify(updatedUnlockedDialogues), JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, userId, caseId]
     );
@@ -656,7 +685,7 @@ router.post('/:caseId/accuse', authenticateToken, async (req: AuthRequest, res: 
     }
 
     // Deduct score for hints used or excessive time spent
-    const timeDeduction = Math.floor(progress.current_time / 30) * 5; // -5 points for every 30 mins
+    const timeDeduction = Math.floor(progress.elapsed_time / 30) * 5; // -5 points for every 30 mins
     const hintDeduction = progress.hints_used * 10; // -10 points per hint
     finalScore = Math.max(10, finalScore - timeDeduction - hintDeduction);
 
@@ -678,7 +707,7 @@ router.post('/:caseId/accuse', authenticateToken, async (req: AuthRequest, res: 
       description: ending.description,
       score: finalScore,
       stats: {
-        timeSpentMinutes: progress.current_time,
+        timeSpentMinutes: progress.elapsed_time,
         hintsUsed: progress.hints_used,
         cluesDiscovered: progress.discovered_evidence.length,
         contradictionsFound: progress.discovered_contradictions.length

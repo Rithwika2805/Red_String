@@ -33,8 +33,8 @@ interface GameContextType {
   };
   notes: any[];
   loading: boolean;
-  startCase: (caseId: string) => Promise<void>;
-  fetchProgress: (caseId: string) => Promise<void>;
+  startCase: (caseId: string) => Promise<boolean>;
+  fetchProgress: (caseId: string) => Promise<boolean>;
   investigateNode: (caseId: string, locationId: string, nodeId: string) => Promise<any>;
   talkToSuspect: (caseId: string, suspectId: string, nodeKey: string) => Promise<any>;
   crossExamine: (caseId: string, statementId: string, evidenceId: string) => Promise<any>;
@@ -148,7 +148,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProgress = useCallback(async (caseId: string) => {
-    if (!token) return;
+    if (!token) return false;
     try {
       const res = await fetch(`/api/cases/${caseId}/progress`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -172,14 +172,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             pan: boardData.pan || { x: 0, y: 0 },
           });
         }
+        return true;
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to load case progress: ${errorData.error || 'Unknown error'}`);
+        return false;
       }
     } catch (err) {
       console.error('Error fetching progress:', err);
+      alert('Error loading case progress: network or database connection failure.');
+      return false;
     }
   }, [token]);
 
   const startCase = async (caseId: string) => {
-    if (!token) return;
+    if (!token) return false;
     setLoading(true);
     try {
       triggerAudio('door');
@@ -190,9 +197,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok) {
         await fetchProgress(caseId);
         await fetchNotes(caseId);
+        return true;
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to start case: ${errorData.error || 'Unknown error'}`);
+        return false;
       }
     } catch (err) {
       console.error('Error starting case:', err);
+      alert('Error starting case: network or database connection failure.');
+      return false;
     } finally {
       setLoading(false);
     }

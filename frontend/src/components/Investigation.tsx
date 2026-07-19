@@ -209,17 +209,31 @@ export const Investigation: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                                     const subNode = node.nodes[subNodeId];
                                     const subDiscovered = progress?.discovered_evidence.includes(subNode.evidence_reward) || 
                                                           progress?.inventory.includes(subNode.inventory_reward);
+                                    const isParentLocked = node.locked && !(
+                                      (node.requires_key && progress?.inventory.includes(node.requires_key)) ||
+                                      (node.requires_password && progress?.inventory.includes(node.requires_password))
+                                    );
+
                                     return (
                                       <button
                                         key={subNodeId}
+                                        disabled={isParentLocked}
                                         onClick={() => handleNodeClick(selectedRoomId, subNodeId)}
-                                        className="w-full text-left bg-noir-900/5 hover:bg-noir-900/10 p-2 rounded border border-noir-900/10 text-xs font-typewriter flex justify-between items-center"
+                                        className={`w-full text-left p-2 rounded border text-xs font-typewriter flex justify-between items-center transition ${
+                                          isParentLocked
+                                            ? 'bg-noir-900/5 border-noir-900/5 text-noir-900/30 cursor-not-allowed opacity-50'
+                                            : 'bg-noir-900/5 hover:bg-noir-900/10 border-noir-900/10 text-noir-900 hover:text-yellow-600'
+                                        }`}
                                       >
                                         <span>Inspect {subNode.name}</span>
                                         {subDiscovered ? (
                                           <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
                                         ) : (
-                                          subNode.locked && <Key className="w-3 h-3 text-amber-700" />
+                                          isParentLocked ? (
+                                            <Key className="w-3 h-3 text-amber-700" />
+                                          ) : (
+                                            subNode.locked && <Key className="w-3 h-3 text-amber-700" />
+                                          )
                                         )}
                                       </button>
                                     );

@@ -1,5 +1,11 @@
 -- PostgreSQL Database Schema for Red String Detective Engine
 
+-- Clean Reset
+DROP TABLE IF EXISTS journal_entries CASCADE;
+DROP TABLE IF EXISTS board_state CASCADE;
+DROP TABLE IF EXISTS user_progress CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -15,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     case_id VARCHAR(100) NOT NULL,
     case_type VARCHAR(100) NOT NULL,
-    "current_time" INT DEFAULT 0, -- minutes passed since case start (e.g. 9:00 PM = 0)
+    elapsed_time INT DEFAULT 0, -- minutes passed since case start (e.g. 9:00 PM = 0)
     randomized_variables JSONB NOT NULL DEFAULT '{}'::jsonb, -- e.g. safe codes, keys placement
     inventory JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['pocket_watch', 'drawer_key']
     discovered_evidence JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['broken_watch']

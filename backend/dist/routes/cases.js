@@ -75,13 +75,13 @@ router.post('/:caseId/start', auth_1.authenticateToken, async (req, res, next) =
         const initialScenes = ['study', 'kitchen', 'gardens'];
         // Upsert user progress
         await (0, db_1.query)(`INSERT INTO user_progress (
-        user_id, case_id, case_type, current_time, randomized_variables, 
+        user_id, case_id, case_type, elapsed_time, randomized_variables, 
         inventory, discovered_evidence, discovered_contradictions, 
         unlocked_dialogues, unlocked_people, revealed_suspicion_meters, 
         unlocked_scenes, completed, score, ending_reached
       ) VALUES ($1, $2, $3, 0, $4, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, $5, '[]'::jsonb, $6, false, 0, null)
       ON CONFLICT (user_id, case_id) DO UPDATE SET
-        current_time = 0,
+        elapsed_time = 0,
         randomized_variables = $4,
         inventory = '[]'::jsonb,
         discovered_evidence = '[]'::jsonb,
@@ -186,6 +186,7 @@ router.get('/:caseId/progress', auth_1.authenticateToken, async (req, res, next)
         res.json({
             progress: {
                 ...progress,
+                current_time: progress.elapsed_time,
                 unlocked_people: updatedPeople,
                 revealed_suspicion_meters: updatedRevealedMeters,
                 suspicion_scores: calculatedSuspicion,
@@ -312,9 +313,9 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
         if (updatedEvidence.includes('hallway_logs') && !updatedScenes.includes('security_room')) {
             updatedScenes.push('security_room');
         }
-        const updatedTime = progress.current_time + timeCost;
+        const updatedTime = progress.elapsed_time + timeCost;
         await (0, db_1.query)(`UPDATE user_progress 
-       SET inventory = $1, discovered_evidence = $2, current_time = $3, unlocked_scenes = $4
+       SET inventory = $1, discovered_evidence = $2, elapsed_time = $3, unlocked_scenes = $4
        WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, JSON.stringify(updatedScenes), userId, caseId]);
         res.json({
             message: 'Node investigated successfully',
@@ -389,9 +390,9 @@ router.post('/:caseId/dialogue', auth_1.authenticateToken, async (req, res, next
         if (!updatedUnlockedDialogues.includes(statementCardId)) {
             updatedUnlockedDialogues.push(statementCardId);
         }
-        const updatedTime = progress.current_time + timeCost;
+        const updatedTime = progress.elapsed_time + timeCost;
         await (0, db_1.query)(`UPDATE user_progress 
-       SET unlocked_dialogues = $1, inventory = $2, discovered_evidence = $3, current_time = $4
+       SET unlocked_dialogues = $1, inventory = $2, discovered_evidence = $3, elapsed_time = $4
        WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(updatedUnlockedDialogues), JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, userId, caseId]);
         res.json({
             node,
@@ -526,7 +527,7 @@ router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) 
             }
         }
         // Deduct score for hints used or excessive time spent
-        const timeDeduction = Math.floor(progress.current_time / 30) * 5; // -5 points for every 30 mins
+        const timeDeduction = Math.floor(progress.elapsed_time / 30) * 5; // -5 points for every 30 mins
         const hintDeduction = progress.hints_used * 10; // -10 points per hint
         finalScore = Math.max(10, finalScore - timeDeduction - hintDeduction);
         const ending = endingsConfig.endings[endingId];
@@ -542,7 +543,7 @@ router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) 
             description: ending.description,
             score: finalScore,
             stats: {
-                timeSpentMinutes: progress.current_time,
+                timeSpentMinutes: progress.elapsed_time,
                 hintsUsed: progress.hints_used,
                 cluesDiscovered: progress.discovered_evidence.length,
                 contradictionsFound: progress.discovered_contradictions.length

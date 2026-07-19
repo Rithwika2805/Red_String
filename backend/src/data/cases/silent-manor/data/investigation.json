@@ -15,17 +15,11 @@
           },
           "drawer": {
             "name": "Mahogany Drawer",
-            "description": "A heavy wooden drawer. It appears to be locked tight.",
+            "description": "A heavy wooden drawer. Inside is a folder labeled 'New Will - Draft'.",
             "locked": true,
             "requires_key": "desk_key",
-            "nodes": {
-              "will": {
-                "name": "Confidential Folder",
-                "description": "A folder labeled 'New Will - Draft'.",
-                "evidence_reward": "will_draft",
-                "cost_minutes": 15
-              }
-            }
+            "evidence_reward": "will_draft",
+            "cost_minutes": 15
           },
           "phone": {
             "name": "Arthur's Smartphone",
