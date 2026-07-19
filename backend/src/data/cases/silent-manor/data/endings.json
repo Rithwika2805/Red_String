@@ -1,0 +1,34 @@
+{
+  "culprit": "victor_hayes",
+  "weapon": "wine_glass",
+  "method": "cyanide_poisoning",
+  "motive": "embezzlement_exposure",
+  "time_of_death": "10:03 PM",
+  "core_evidence": ["wine_glass", "burned_letter", "security_footage"],
+  "endings": {
+    "wrong_culprit": {
+      "title": "A Grave Injustice",
+      "rating": "Case Failed",
+      "description": "You formally accuse someone who was innocent. The real murderer, Victor Hayes, remains free, while an innocent life is ruined. Detective Harris mocks your amateur deduction. Case Closed... incorrectly.",
+      "score_modifier": 0
+    },
+    "insufficient_evidence": {
+      "title": "Case Dismissed",
+      "rating": "Weak Detective",
+      "description": "You identified Victor Hayes, but failed to lay out any solid proof. The judge dismisses the case for lack of evidence. Victor smiles coldly as he walks out of the courtroom. The Blackwood family is devastated by your failure.",
+      "score_modifier": 25
+    },
+    "weak_evidence": {
+      "title": "Escape from Conviction",
+      "rating": "Amateur Detective",
+      "description": "You correctly pointed to Victor Hayes and presented some clues. However, without proving his presence (Gate Security Logs) or Motive (Charred Letter), his defense lawyers dismantle your theories. Victor escapes conviction on technicalities, fleeing the country shortly after. You found the truth, but let the killer go.",
+      "score_modifier": 50
+    },
+    "conviction_true": {
+      "title": "Justice Served (True Ending)",
+      "rating": "Master Detective",
+      "description": "You present an airtight case. Confronted with the Stained Wine Glass (cyanide), the Embezzlement Motive (Charred Letter/Bank Transfer), and proof of his presence at 10:03 PM (Gate Logs contradicting his alibi), Victor Hayes breaks down and confesses. Detective Harris apologizes and arrests him. The Blackwood case is finally closed.",
+      "score_modifier": 100
+    }
+  }
+}

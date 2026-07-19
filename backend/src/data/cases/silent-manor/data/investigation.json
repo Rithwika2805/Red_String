@@ -1,0 +1,167 @@
+{
+  "study": {
+    "name": "Arthur's Study",
+    "description": "A spacious, wood-paneled room. The air is heavy with the smell of old paper and red wine. Arthur's body was found slumped on the desk here.",
+    "nodes": {
+      "desk": {
+        "name": "Arthur's Desk",
+        "description": "A massive mahogany desk cluttered with business ledgers, letters, and a half-empty glass of red wine.",
+        "nodes": {
+          "glass": {
+            "name": "Stained Glass",
+            "description": "A crystal wine glass containing dregs of dark red liquid. An odor of almonds lingers.",
+            "evidence_reward": "wine_glass",
+            "cost_minutes": 10
+          },
+          "drawer": {
+            "name": "Mahogany Drawer",
+            "description": "A heavy wooden drawer. It appears to be locked tight.",
+            "locked": true,
+            "requires_key": "desk_key",
+            "nodes": {
+              "will": {
+                "name": "Confidential Folder",
+                "description": "A folder labeled 'New Will - Draft'.",
+                "evidence_reward": "will_draft",
+                "cost_minutes": 15
+              }
+            }
+          },
+          "phone": {
+            "name": "Arthur's Smartphone",
+            "description": "Arthur's personal phone. It is unlocked.",
+            "evidence_reward": "phone_logs",
+            "cost_minutes": 10
+          }
+        }
+      },
+      "fireplace": {
+        "name": "Stone Fireplace",
+        "description": "Cold ashes and half-burned logs sit inside the grate.",
+        "nodes": {
+          "ashes": {
+            "name": "Burnt Papers",
+            "description": "Among the ashes is a piece of paper that escaped complete destruction.",
+            "evidence_reward": "burned_letter",
+            "cost_minutes": 15
+          }
+        }
+      },
+      "cabinet": {
+        "name": "Display Cabinet",
+        "description": "Glass cabinets containing trophies, old photos, and medical supplies.",
+        "nodes": {
+          "pillbox": {
+            "name": "Arthur's Medication",
+            "description": "Several bottles of prescription pills.",
+            "evidence_reward": "medicine_bottle",
+            "cost_minutes": 5
+          }
+        }
+      },
+      "floor": {
+        "name": "Study Floor",
+        "description": "A soft Persian rug covers the floor. Near the chair, something glints.",
+        "nodes": {
+          "pocketwatch": {
+            "name": "Metallic Object",
+            "description": "A silver watch lying in the shadow of the desk leg.",
+            "evidence_reward": "broken_watch",
+            "cost_minutes": 5
+          }
+        }
+      }
+    }
+  },
+  "kitchen": {
+    "name": "Mansion Kitchen",
+    "description": "A large commercial-grade kitchen. Copper pots hang from the ceiling. James and Olivia spend their time here.",
+    "nodes": {
+      "counter": {
+        "name": "Kitchen Counter",
+        "description": "A clean counter with a silver tea set and a teapot, still slightly warm.",
+        "cost_minutes": 5
+      },
+      "pantry": {
+        "name": "Pantry Shelves",
+        "description": "Shelves lined with jars of flour, sugar, spices, and cleaning agents.",
+        "nodes": {
+          "deskkey": {
+            "name": "Jammed Drawer",
+            "description": "A drawer at the bottom of the pantry shelf. Opening it reveals a small brass key.",
+            "inventory_reward": "desk_key",
+            "cost_minutes": 10
+          },
+          "hiddenshelf": {
+            "name": "Pantry Undershelf",
+            "description": "Checking underneath the spices shelf... something is taped here.",
+            "evidence_reward": "cyanide_vial",
+            "cost_minutes": 15
+          }
+        }
+      }
+    }
+  },
+  "gardens": {
+    "name": "Mansion Gardens",
+    "description": "The gardens surrounding the estate. Rain is falling heavily, washing away footprints quickly.",
+    "nodes": {
+      "flowerbed": {
+        "name": "Flowerbed near Study Window",
+        "description": "A bed of wet soil right outside Arthur's study window.",
+        "nodes": {
+          "footprint": {
+            "name": "Indented Soil",
+            "description": "Deep prints left in the mud.",
+            "evidence_reward": "footprints",
+            "cost_minutes": 15
+          }
+        }
+      }
+    }
+  },
+  "security_room": {
+    "name": "Security Office",
+    "description": "A small office filled with monitors displaying feeds of the grounds. The console lights blink.",
+    "nodes": {
+      "computer": {
+        "name": "Security Computer",
+        "description": "The main logging console. It is locked by a password.",
+        "locked": true,
+        "requires_password": "security_password",
+        "nodes": {
+          "gate_logs": {
+            "name": "Gate Entry/Exit Logs",
+            "description": "Digital timestamps of vehicles entering and exiting the estate gates.",
+            "evidence_reward": "security_footage",
+            "cost_minutes": 15
+          },
+          "hall_logs": {
+            "name": "Hallway Motion Sensor Logs",
+            "description": "Detailed log files showing motion events in the study corridor.",
+            "evidence_reward": "hallway_logs",
+            "cost_minutes": 15
+          }
+        }
+      },
+      "whiteboard": {
+        "name": "Security Noticeboard",
+        "description": "A small white board with scribbled notes. One note lists a phone extension. Another note is partially erased but shows: 'PC Code: 1003'",
+        "inventory_reward": "security_password",
+        "cost_minutes": 10
+      }
+    }
+  },
+  "studio": {
+    "name": "Sophia's Studio",
+    "description": "An airy loft filled with canvases, tubes of oil paint, and the scent of turpentine.",
+    "nodes": {
+      "easel": {
+        "name": "Work Easel",
+        "description": "A large canvas showing a dark watercolor landscape. Next to it are sales records.",
+        "evidence_reward": "forged_signature",
+        "cost_minutes": 15
+      }
+    }
+  }
+}

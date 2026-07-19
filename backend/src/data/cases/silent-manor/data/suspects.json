@@ -1,0 +1,151 @@
+{
+  "arthur_blackwood": {
+    "name": "Arthur Blackwood",
+    "role": "Victim",
+    "description": "Founder and CEO of Blackwood Industries. Highly wealthy but had many deep conflicts with his family and business partners.",
+    "is_victim": true,
+    "initial_suspicion": 0,
+    "threshold_reveal_suspect": 999,
+    "locations": {
+      "21:00": "study"
+    }
+  },
+  "eleanor_blackwood": {
+    "name": "Eleanor Blackwood",
+    "role": "Wife",
+    "description": "Arthur's wife of 30 years. Quiet, elegant, and strangely detached from the tragedy. Claims she was reading in the library all evening.",
+    "initial_suspicion": 15,
+    "threshold_reveal_suspect": 25,
+    "locations": {
+      "21:00": "parlor",
+      "22:00": "bedroom",
+      "23:00": "bedroom"
+    },
+    "secrets": {
+      "unhappy_marriage": {
+        "category": "Personal",
+        "importance": "medium",
+        "description": "Eleanor was planning to divorce Arthur. She was cut out of the new will draft.",
+        "changes_suspicion": 15,
+        "unlocks_dialogue": "eleanor_divorce_confront"
+      }
+    }
+  },
+  "daniel_blackwood": {
+    "name": "Daniel Blackwood",
+    "role": "Son",
+    "description": "Arthur's son. He has a history of reckless behavior and massive gambling debts. Argued loudly with Arthur yesterday.",
+    "initial_suspicion": 20,
+    "threshold_reveal_suspect": 30,
+    "locations": {
+      "21:00": "guest_room",
+      "22:00": "parlor",
+      "23:00": "guest_room"
+    },
+    "secrets": {
+      "gambling_debts": {
+        "category": "Financial",
+        "importance": "high",
+        "description": "Daniel owes $2M to underground bookies. He desperately needed Arthur's inheritance.",
+        "changes_suspicion": 20,
+        "unlocks_dialogue": "daniel_debt_confront"
+      }
+    }
+  },
+  "sophia_blackwood": {
+    "name": "Sophia Blackwood",
+    "role": "Daughter",
+    "description": "An avant-garde artist. Arthur was disapproving of her lifestyle and threatened to stop funding her studio.",
+    "initial_suspicion": 10,
+    "threshold_reveal_suspect": 20,
+    "locations": {
+      "21:00": "studio",
+      "22:00": "studio",
+      "23:00": "parlor"
+    },
+    "secrets": {
+      "forged_art": {
+        "category": "Financial",
+        "importance": "medium",
+        "description": "Sophia forged Arthur's signature to sell family art pieces to support her lifestyle.",
+        "changes_suspicion": 15,
+        "unlocks_dialogue": "sophia_forgery_confront"
+      }
+    }
+  },
+  "james_holloway": {
+    "name": "James Holloway",
+    "role": "Butler",
+    "description": "The loyal butler who has served the Blackwood family for 25 years. Knows the mansion layout intimately. Claims he was prepping tea in the kitchen.",
+    "initial_suspicion": 5,
+    "threshold_reveal_suspect": 15,
+    "locations": {
+      "21:00": "kitchen",
+      "22:00": "hallway",
+      "23:00": "kitchen"
+    },
+    "secrets": {
+      "hallway_presence": {
+        "category": "Timeline",
+        "importance": "high",
+        "description": "James was near the study around 10:00 PM, despite claiming he never left the kitchen.",
+        "changes_suspicion": 25,
+        "unlocks_dialogue": "james_hallway_confront"
+      }
+    }
+  },
+  "olivia_reed": {
+    "name": "Olivia Reed",
+    "role": "Housekeeper",
+    "description": "The nervous housekeeper. She claims she saw someone sneak toward the study around 10 PM but refuses to name them.",
+    "initial_suspicion": 5,
+    "threshold_reveal_suspect": 15,
+    "locations": {
+      "21:00": "kitchen",
+      "22:00": "kitchen",
+      "23:00": "staff_quarters"
+    },
+    "secrets": {
+      "fearful_witness": {
+        "category": "Personal",
+        "importance": "medium",
+        "description": "Olivia saw Victor Hayes near the study, but Victor threatened her job and safety.",
+        "changes_suspicion": 10,
+        "unlocks_dialogue": "olivia_witness_confront"
+      }
+    }
+  },
+  "victor_hayes": {
+    "name": "Victor Hayes",
+    "role": "Business Partner",
+    "description": "Arthur's business partner and CFO. Highly polished, corporate executive. Claims he spent the entire night at his suburban residence.",
+    "initial_suspicion": 10,
+    "threshold_reveal_suspect": 20,
+    "locations": {
+      "21:00": "external_residence",
+      "22:00": "external_residence",
+      "23:00": "external_residence"
+    },
+    "secrets": {
+      "embezzlement": {
+        "category": "Financial",
+        "importance": "critical",
+        "description": "Victor embezzled $5M from company funds and Arthur discovered it right before his death.",
+        "changes_suspicion": 35,
+        "unlocks_dialogue": "victor_fraud_confront"
+      }
+    }
+  },
+  "detective_harris": {
+    "name": "Detective Harris",
+    "role": "Police Inspector",
+    "description": "The lead police investigator assigned to the case. Cynical and impatient. Insists Arthur committed suicide and wants to wrap up the investigation.",
+    "initial_suspicion": 0,
+    "threshold_reveal_suspect": 999,
+    "locations": {
+      "21:00": "study",
+      "22:00": "parlor",
+      "23:00": "study"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-noir-950 text-parchment-100 font-sans antialiased overflow-hidden h-screen w-screen;
+    background-image: radial-gradient(circle at 50% 30%, #15151e 0%, #0a0a0c 100%);
+  }
+
+  /* Custom Vintage Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111115;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3e271a;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #523424;
+  }
+}
+
+/* Corkboard Grid Pattern */
+.corkboard-texture {
+  background-color: #241810;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 0);
+  background-size: 8px 8px;
+  background-position: 0 0, 4px 4px;
+}
+
+/* Desk wood texture */
+.desk-texture {
+  background-color: #1a0f0a;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.25) 50%, transparent 50%),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 50%, transparent 50%);
+  background-size: 100% 4px, 4px 100%;
+}
+
+/* Typewriter paper */
+.paper-texture {
+  background-color: #f5f0db;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+  box-shadow: 
+    0 1px 1px rgba(0,0,0,0.15), 
+    0 10px 0 -5px #eee, 
+    0 10px 1px -4px rgba(0,0,0,0.15), 
+    0 20px 0 -10px #eee, 
+    0 20px 1px -9px rgba(0,0,0,0.15);
+}
+
+/* Lamp shadow overlay */
+.lamp-glow-overlay {
+  background: radial-gradient(circle at 50% 10%, rgba(253, 224, 71, 0.08) 0%, rgba(0, 0, 0, 0) 60%);
+  pointer-events: none;
+}
+
+/* Custom glow borders */
+.glow-border {
+  box-shadow: 0 0 10px rgba(253, 224, 71, 0.1);
+  border: 1px solid rgba(253, 224, 71, 0.2);
+}
+
+.glow-border-red {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Rain blur filter */
+.rain-blur {
+  backdrop-filter: blur(1px);
+}

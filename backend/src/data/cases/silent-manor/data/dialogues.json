@@ -1,0 +1,367 @@
+{
+  "james_holloway": {
+    "root": {
+      "text": "Yes, Detective? I have served Mr. Blackwood for 25 years. This is a tragic suicide.",
+      "choices": [
+        {
+          "text": "Where were you around 10:00 PM?",
+          "next": "james_alibi_tea",
+          "actions": { "advance_time": 15 }
+        },
+        {
+          "text": "Tell me about Arthur's relationship with Victor Hayes.",
+          "next": "james_about_victor",
+          "actions": { "advance_time": 15 }
+        },
+        {
+          "text": "Confront him about the glass vial found in the pantry.",
+          "next": "james_pantry_confront",
+          "conditions": { "discovered_evidence": ["cyanide_vial"] },
+          "actions": { "advance_time": 20 }
+        }
+      ]
+    },
+    "james_alibi_tea": {
+      "text": "I was in the kitchen preparing Mr. Blackwood's evening chamomile tea between 9:30 PM and 10:30 PM. I never left the kitchen area.",
+      "contradicts": {
+        "hallway_logs": "james_hallway_lie"
+      },
+      "choices": [
+        {
+          "text": "Did Arthur drink the tea?",
+          "next": "james_tea_details"
+        },
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "james_tea_details": {
+      "text": "No, I brought it to his door, but the study was locked. I left it on the cart in the hallway, as he requested over the intercom.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "james_about_victor": {
+      "text": "Mr. Hayes visited Mr. Blackwood regularly. However, their last business meeting ended in shouting. Arthur was furious about company accounts.",
+      "choices": [
+        {
+          "text": "What were they shouting about?",
+          "next": "james_shouting_details",
+          "actions": { "add_evidence": "phone_logs" }
+        },
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "james_shouting_details": {
+      "text": "I couldn't hear clearly, but Mr. Blackwood threatened to involve the authorities. Victor Hayes looked pale when he departed.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "james_pantry_confront": {
+      "text": "What?! A vial of potassium cyanide in my pantry? I swear on my life, I have never seen this! Someone must have planted it to frame me!",
+      "choices": [
+        {
+          "text": "I'll be watching you, James.",
+          "next": "root"
+        }
+      ]
+    },
+    "james_hallway_confront": {
+      "text": "Alright, yes! I walked down the study hallway at 10:00 PM to bring Arthur his tea. I lied because Detective Harris warned me that walking near the crime scene would make me the prime suspect. I didn't poison him!",
+      "choices": [
+        {
+          "text": "Understood. Stay in the kitchen.",
+          "next": "root"
+        }
+      ]
+    }
+  },
+  "victor_hayes": {
+    "root": {
+      "text": "Detective. Arthur's death is a shock to us all. Blackwood Industries has lost its visionary leader.",
+      "choices": [
+        {
+          "text": "What was your schedule last night?",
+          "next": "victor_alibi",
+          "actions": { "advance_time": 15 }
+        },
+        {
+          "text": "Arthur was auditing company records. What did he find?",
+          "next": "victor_audit",
+          "actions": { "advance_time": 15 }
+        },
+        {
+          "text": "Confront him with the charred letter from the fireplace.",
+          "next": "victor_letter_confront",
+          "conditions": { "discovered_evidence": ["burned_letter"] },
+          "actions": { "advance_time": 20 }
+        }
+      ]
+    },
+    "victor_alibi": {
+      "text": "I spent the entire night at my suburban residence in Elmwood, about an hour's drive from here. I was asleep by 9:30 PM.",
+      "contradicts": {
+        "security_footage": "victor_gate_lie"
+      },
+      "choices": [
+        {
+          "text": "Can anyone verify your alibi?",
+          "next": "victor_alibi_verification"
+        },
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "victor_alibi_verification": {
+      "text": "I live alone, Detective. But my phone records and home automation logs will show no activity after 9:30 PM.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "victor_audit": {
+      "text": "Our corporate finances are perfectly standard. We had some minor quarterly discrepancies, but nothing Arthur would raise concerns about.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "victor_letter_confront": {
+      "text": "This... this is an outrageous fabrication! Arthur was prone to paranoia in his later years. This letter means nothing! You have no proof of any embezzlement.",
+      "choices": [
+        {
+          "text": "We will see, Victor.",
+          "next": "root"
+        }
+      ]
+    },
+    "victor_fraud_confront": {
+      "text": "You found the offshore transfers... Fine. Arthur found out. But that doesn't make me a killer. I visited him, yes, but he was alive when I left!",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    }
+  },
+  "eleanor_blackwood": {
+    "root": {
+      "text": "Detective, please make this quick. The police have already concluded it was suicide. I wish to grieve in peace.",
+      "choices": [
+        {
+          "text": "What can you tell me about Arthur's sleeping pills?",
+          "next": "eleanor_pills",
+          "actions": { "advance_time": 15 }
+        },
+        {
+          "text": "How was your relationship with Arthur recently?",
+          "next": "eleanor_relationship",
+          "actions": { "advance_time": 15 }
+        }
+      ]
+    },
+    "eleanor_pills": {
+      "text": "Arthur took sleeping pills regularly. He was under immense stress and could barely sleep without them. I usually handed him the dose myself.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "eleanor_relationship": {
+      "text": "We had a stable, mature marriage. Of course, we had our disagreements, but nothing out of the ordinary.",
+      "contradicts": {
+        "will_draft": "eleanor_will_lie"
+      },
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "eleanor_divorce_confront": {
+      "text": "Alright, so I wanted a divorce, and he cut me out. But I was in my parlor reading. Ask Olivia if you don't believe me.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    }
+  },
+  "daniel_blackwood": {
+    "root": {
+      "text": "Hey. If you are here to ask me about the inheritance, save your breath. My dad was a control freak.",
+      "choices": [
+        {
+          "text": "What was your argument with Arthur yesterday about?",
+          "next": "daniel_argument",
+          "actions": { "advance_time": 20 }
+        },
+        {
+          "text": "Where were you last night between 9 PM and 11 PM?",
+          "next": "daniel_alibi",
+          "actions": { "advance_time": 15 }
+        }
+      ]
+    },
+    "daniel_argument": {
+      "text": "He wanted me to join the firm and stop doing art auctions. I told him to stuff it. I don't care about his money anyway.",
+      "contradicts": {
+        "will_draft": "daniel_will_motive"
+      },
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "daniel_alibi": {
+      "text": "I was in the guest room listening to music. I didn't see anyone or hear anything because I had my headphones on.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "daniel_debt_confront": {
+      "text": "Okay! I have gambling debts! The bookies are threatening to break my legs. I begged my dad for a loan, and he refused, saying a night in jail would teach me discipline. But I didn't kill him! If he's dead, I get my inheritance and pay the debts anyway, so why would I kill him early and risk jail?",
+      "choices": [
+        {
+          "text": "An interesting perspective. Go back.",
+          "next": "root"
+        }
+      ]
+    }
+  },
+  "sophia_blackwood": {
+    "root": {
+      "text": "Father never understood art. To him, everything was a balance sheet. What do you want, Detective?",
+      "choices": [
+        {
+          "text": "Did Arthur plan to change his will?",
+          "next": "sophia_will",
+          "actions": { "advance_time": 15 }
+        }
+      ]
+    },
+    "sophia_will": {
+      "text": "He threatened to write us all out. Especially Daniel. He wanted to leave it all to some corporate foundation. I told him he was being vindictive.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "sophia_forgery_confront": {
+      "text": "Fine! I forged his signature on some certificates to cover studio rent. He didn't even care about those paintings. But murder? You're out of your mind.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    }
+  },
+  "olivia_reed": {
+    "root": {
+      "text": "Oh, Detective... I am so frightened. This house has secrets. I... I shouldn't speak.",
+      "choices": [
+        {
+          "text": "What did you see near the study last night?",
+          "next": "olivia_sight",
+          "actions": { "advance_time": 20 }
+        }
+      ]
+    },
+    "olivia_sight": {
+      "text": "I saw someone in a dark trench coat slipping down the corridor toward the study around 10:00 PM. But it was too dark to see their face! I swear, I don't know who it was!",
+      "choices": [
+        {
+          "text": "Are you sure you couldn't identify them?",
+          "next": "olivia_sight_hesitation"
+        },
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "olivia_sight_hesitation": {
+      "text": "I... I can't say. I have a family to support, Detective. Please don't force me. They are powerful people.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "olivia_witness_confront": {
+      "text": "It was Mr. Hayes! I recognized his walk and the silver cufflinks. After he left, he saw me in the pantry and told me if I told anyone, I would end up in a ditch. Please protect me, Detective!",
+      "choices": [
+        {
+          "text": "I will protect you. Thank you, Olivia.",
+          "next": "root",
+          "actions": { "add_evidence": "hallway_logs" }
+        }
+      ]
+    }
+  },
+  "detective_harris": {
+    "root": {
+      "text": "Look, rookie. The study door was locked from the inside. There's a half-empty sleeping pill bottle, and a glass of wine. Arthur took his own life. Stop wasting taxpayers' money.",
+      "choices": [
+        {
+          "text": "What about the broken watch stopped at 9:17?",
+          "next": "harris_watch"
+        },
+        {
+          "text": "Why was there no suicide note?",
+          "next": "harris_note"
+        }
+      ]
+    },
+    "harris_watch": {
+      "text": "He fell, the watch hit the desk, and broke. It matches the time his wife saw him enter the study. Simple physics.",
+      "choices": [
+        {
+          "text": "Go back.",
+          "next": "root"
+        }
+      ]
+    },
+    "harris_note": {
+      "text": "Not everyone leaves a note. Sometimes they are too depressed. Keep noseying around, and I'll have your private investigator license revoked.",
+      "choices": [
+        {
+          "text": "Understood, inspector.",
+          "next": "root"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "broken_watch": {
+    "title": "Broken Pocket Watch",
+    "description": "Stopped at 9:17 PM. The hands are jammed; looks like a physical struggle took place.",
+    "location": "Study Floor",
+    "reliability": "Questionable",
+    "tags": ["Physical", "Timeline", "Forensic"],
+    "importance": "high",
+    "unlocked_by": "search_study_floor",
+    "possible_uses": "Determining exact time of struggle.",
+    "suspicion_impact": {
+      "daniel_blackwood": 10,
+      "victor_hayes": 5
+    }
+  },
+  "wine_glass": {
+    "title": "Stained Wine Glass",
+    "description": "A glass containing red wine residue. Smells faintly of bitter almonds (cyanide).",
+    "location": "Study Desk",
+    "reliability": "Very Reliable",
+    "tags": ["Physical", "Forensic"],
+    "importance": "high",
+    "unlocked_by": "search_study_desk",
+    "possible_uses": "Identifying the murder weapon.",
+    "suspicion_impact": {
+      "eleanor_blackwood": 5,
+      "james_holloway": 10,
+      "victor_hayes": 15
+    }
+  },
+  "medicine_bottle": {
+    "title": "Arthur's Pill Bottle",
+    "description": "Prescription sleeping pills. Almost full. Arthur was supposed to take them nightly.",
+    "location": "Study Cabinet",
+    "reliability": "Reliable",
+    "tags": ["Physical", "Forensic"],
+    "importance": "medium",
+    "unlocked_by": "search_cabinet",
+    "possible_uses": "Ruling out natural causes or validating sleep schedules.",
+    "suspicion_impact": {
+      "eleanor_blackwood": 10
+    }
+  },
+  "burned_letter": {
+    "title": "Charred Letter Fragment",
+    "description": "A half-burned letter from Arthur to Victor Hayes. Reads: '...found the missing company assets. Tomorrow I will report you to the fraud squad. There is no escape, Victor.'",
+    "location": "Study Fireplace",
+    "reliability": "Very Reliable",
+    "tags": ["Physical", "Financial", "Personal"],
+    "importance": "high",
+    "unlocked_by": "search_fireplace",
+    "possible_uses": "Establishing the motive for murder.",
+    "suspicion_impact": {
+      "victor_hayes": 40
+    }
+  },
+  "footprints": {
+    "title": "Muddy Footprints",
+    "description": "Wet footprints near the outer window sill. Size 10. Too small for Arthur, too big for Eleanor.",
+    "location": "Mansion Gardens",
+    "reliability": "Reliable",
+    "tags": ["Forensic", "Physical"],
+    "importance": "medium",
+    "unlocked_by": "search_gardens",
+    "possible_uses": "Confirming presence of an outside intruder.",
+    "suspicion_impact": {
+      "daniel_blackwood": 10,
+      "victor_hayes": 20
+    }
+  },
+  "bank_transfer": {
+    "title": "Suspicious Bank Transfer Statement",
+    "description": "A private printout showing $5M transferred from Blackwood Industries to an offshore shell company owned by 'V.H.'",
+    "location": "Desk Hidden Safe",
+    "reliability": "Very Reliable",
+    "tags": ["Financial", "Digital"],
+    "importance": "high",
+    "unlocked_by": "open_desk_safe",
+    "possible_uses": "Proving embezzlement motive.",
+    "suspicion_impact": {
+      "victor_hayes": 30
+    }
+  },
+  "phone_logs": {
+    "title": "Arthur's Phone Logs",
+    "description": "Call records from Arthur's mobile. At 9:45 PM he called Victor Hayes (duration: 12 seconds). At 9:50 PM he called Detective Harris (duration: 3 minutes, missed call).",
+    "location": "Arthur's Phone",
+    "reliability": "Very Reliable",
+    "tags": ["Digital", "Timeline"],
+    "importance": "high",
+    "unlocked_by": "inspect_phone",
+    "possible_uses": "Reconstructing the timeline of calls.",
+    "suspicion_impact": {
+      "victor_hayes": 15
+    }
+  },
+  "security_footage": {
+    "title": "Gate Security Logs",
+    "description": "Digital gate log showing Victor's luxury sedan entering the estate grounds at 9:55 PM, and leaving at 10:15 PM.",
+    "location": "Security Room",
+    "reliability": "Very Reliable",
+    "tags": ["Digital", "Timeline"],
+    "importance": "high",
+    "unlocked_by": "search_security_computer",
+    "possible_uses": "Breaking Victor's alibi of being home all night.",
+    "suspicion_impact": {
+      "victor_hayes": 35
+    }
+  },
+  "forged_signature": {
+    "title": "Art Sales Certificate",
+    "description": "A certificate for an expensive watercolor painting, signed by Arthur. Under magnification, the handwriting seems slightly shaky. A expert might call it a forgery.",
+    "location": "Sophia's Studio",
+    "reliability": "Questionable",
+    "tags": ["Financial", "Personal"],
+    "importance": "low",
+    "unlocked_by": "search_studio_easel",
+    "possible_uses": "Investigating family secrets (Red Herring).",
+    "suspicion_impact": {
+      "sophia_blackwood": 25
+    }
+  },
+  "will_draft": {
+    "title": "Draft of New Will",
+    "description": "Arthur's hand-written draft of a new will, dated yesterday. It removes Daniel Blackwood and Victor Hayes entirely from his estate and leaves all shares to a charity.",
+    "location": "Desk Locked Drawer",
+    "reliability": "Reliable",
+    "tags": ["Personal", "Financial"],
+    "importance": "high",
+    "unlocked_by": "unlock_desk_drawer",
+    "possible_uses": "Proving motive for Daniel or business conflicts.",
+    "suspicion_impact": {
+      "daniel_blackwood": 25,
+      "victor_hayes": 10
+    }
+  },
+  "cyanide_vial": {
+    "title": "Small Glass Vial",
+    "description": "A discarded vial with traces of potassium cyanide powder. Taped underneath the shelf in the butler's pantry.",
+    "location": "Butler's Pantry",
+    "reliability": "Questionable",
+    "tags": ["Physical", "Forensic"],
+    "importance": "high",
+    "unlocked_by": "search_pantry_shelf",
+    "possible_uses": "Identifying the poison source (planted by Victor).",
+    "suspicion_impact": {
+      "james_holloway": 40
+    }
+  },
+  "hallway_logs": {
+    "title": "Hallway Motion Sensor Log",
+    "description": "Logs record motion in the study hallway at 10:00 PM. Someone went toward the study. Fits James's route, or someone else.",
+    "location": "Security Room",
+    "reliability": "Reliable",
+    "tags": ["Digital", "Timeline"],
+    "importance": "medium",
+    "unlocked_by": "inspect_motion_sensors",
+    "possible_uses": "Placing suspects in the corridor.",
+    "suspicion_impact": {
+      "james_holloway": 15
+    }
+  }
+}
