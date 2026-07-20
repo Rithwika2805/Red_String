@@ -4,7 +4,7 @@ import { X, Scale, Award, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { progress, definitions, submitAccusation, activeCaseId, triggerAudio } = useGame();
+  const { progress, definitions, submitAccusation, activeCaseId, triggerAudio, showAlert } = useGame();
   
   // Placed slots state
   const [culpritCard, setCulpritCard] = useState<any | null>(null);
@@ -18,15 +18,15 @@ export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) 
   const [verdictResult, setVerdictResult] = useState<any | null>(null);
 
   // Available cards list
-  const availableSuspects = progress?.unlocked_people.map((p: any) => ({
+  const availableSuspects = progress?.unlocked_people?.map((p: any) => ({
     id: p.id,
     type: 'suspect',
     title: p.name,
     tag: 'Suspect'
   })) || [];
 
-  const availableEvidence = progress?.discovered_evidence.map((id: string) => {
-    const clue = definitions?.evidence[id];
+  const availableEvidence = progress?.discovered_evidence?.map((id: string) => {
+    const clue = definitions?.evidence?.[id];
     return {
       id,
       type: 'evidence',
@@ -35,7 +35,7 @@ export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) 
     };
   }) || [];
 
-  const availableContradictions = progress?.discovered_contradictions.map((id: string) => ({
+  const availableContradictions = progress?.discovered_contradictions?.map((id: string) => ({
     id,
     type: 'evidence',
     title: `🚨 CONTRADICTION: ${id.replace(/_/g, ' ').toUpperCase()}`,
@@ -61,7 +61,10 @@ export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) 
       triggerAudio('pin');
 
       if (slotType === 'culprit') {
-        if (card.type !== 'suspect') return alert('Only suspects can be accused as culprits.');
+        if (card.type !== 'suspect') {
+          showAlert('Only suspects can be accused as culprits.');
+          return;
+        }
         setCulpritCard(card);
       } else if (slotType === 'weapon') {
         if (card.type === 'suspect') return;
@@ -78,7 +81,10 @@ export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) 
       } else if (slotType === 'supporting') {
         if (card.type === 'suspect') return;
         if (supportingEvidence.find(c => c.id === card.id)) return;
-        if (supportingEvidence.length >= 5) return alert('Maximum 5 supporting evidence pieces.');
+        if (supportingEvidence.length >= 5) {
+          showAlert('Maximum 5 supporting evidence pieces.');
+          return;
+        }
         setSupportingEvidence([...supportingEvidence, card]);
       }
     } catch (err) {
@@ -101,16 +107,18 @@ export const AccusationTable: React.FC<{ onClose: () => void }> = ({ onClose }) 
   const presentCase = async () => {
     if (!activeCaseId) return;
     if (!culpritCard || !weaponCard || !motiveCard || !methodCard || !timeCard) {
-      alert('You must populate all primary slots before presenting the case.');
+      showAlert('You must populate all primary slots before presenting the case.');
       return;
     }
 
     const payload = {
-      culprit: culpritCard.id,
+      killer: culpritCard.id,
+      culprit: culpritCard.id, // backward compatibility
       weapon: weaponCard.id,
-      motive: motiveCard.id === 'burned_letter' ? 'embezzlement_exposure' : 'embezzlement_exposure', // Maps burned_letter to motive definition
-      method: methodCard.id === 'cyanide_vial' || methodCard.id === 'wine_glass' ? 'cyanide_poisoning' : 'cyanide_poisoning', // Maps to method definition
-      timeOfDeath: timeCard.id === 'security_footage' || timeCard.id === 'hallway_logs' ? '10:03 PM' : '9:17 PM',
+      motive: motiveCard.id,
+      method: methodCard.id,
+      time: timeCard.id,
+      timeOfDeath: timeCard.id, // backward compatibility
       supportingEvidence: [
         weaponCard.id,
         motiveCard.id,

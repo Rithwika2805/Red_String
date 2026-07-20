@@ -1,0 +1,27 @@
+{
+  "study": {
+    "name": "Arthur's Study",
+    "description": "A spacious, wood-paneled room. The air is heavy with the smell of old paper and red wine. Arthur's body was found slumped on the desk here.",
+    "bg_image": "/assets/scenes/study.jpg"
+  },
+  "kitchen": {
+    "name": "Mansion Kitchen",
+    "description": "A large commercial-grade kitchen. Copper pots hang from the ceiling. James and Olivia spend their time here.",
+    "bg_image": "/assets/scenes/kitchen.jpg"
+  },
+  "gardens": {
+    "name": "Mansion Gardens",
+    "description": "The gardens surrounding the estate. Rain is falling heavily, washing away footprints quickly.",
+    "bg_image": "/assets/scenes/gardens.jpg"
+  },
+  "security_room": {
+    "name": "Security Office",
+    "description": "A small office filled with monitors displaying feeds of the grounds. The console lights blink.",
+    "bg_image": "/assets/scenes/security_room.jpg"
+  },
+  "studio": {
+    "name": "Sophia's Studio",
+    "description": "An airy loft filled with canvases, tubes of oil paint, and the scent of turpentine.",
+    "bg_image": "/assets/scenes/studio.jpg"
+  }
+}

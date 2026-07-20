@@ -1,0 +1,12 @@
+{
+  "id": "the-last-broadcast",
+  "title": "The Last Broadcast",
+  "genre": "Conspiracy Mystery",
+  "description": "Elena Voss, a famous investigative journalist, is killed inside a locked broadcasting studio during a live television program.",
+  "difficulty": 3,
+  "length": "2-3 hours",
+  "version": 1,
+  "engineVersion": 1,
+  "entryRoom": "tv_studio",
+  "modules": ["contradiction", "timeline", "audio", "terminal"]
+}

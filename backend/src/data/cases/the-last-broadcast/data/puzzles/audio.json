@@ -1,0 +1,35 @@
+{
+  "id": "audio_voss",
+  "type": "audio",
+  "title": "Audio Restoration",
+  "difficulty": 2,
+  "requirements": {
+    "all": [
+      { "type": "evidence", "id": "corrupted_audio_tape" }
+    ]
+  },
+  "rewards": [
+    { "action": "set", "path": "world_state.audio_solved", "value": true },
+    { "action": "unlock_evidence", "id": "audio_restored" },
+    {
+      "action": "board_card",
+      "card": {
+        "id": "audio_restored",
+        "type": "evidence",
+        "label": "Clue: Restored Tape Dialogue",
+        "x": 400,
+        "y": 250
+      }
+    }
+  ],
+  "data": {
+    "audioId": "chief_recording",
+    "segments": [
+      { "id": 0, "text": "...corruption in the security detail. I know you swiped into the transmitter room..." },
+      { "id": 1, "text": "Elena: Vance, I know about Project Red String. I have the files on the flash drive..." },
+      { "id": 2, "text": "Vance: Voss, you're playing a dangerous game. Some doors are locked for a reason..." },
+      { "id": 3, "text": "...and if you broadcast that folder, you won't live to see the credits roll." }
+    ],
+    "correctOrder": [1, 2, 0, 3]
+  }
+}

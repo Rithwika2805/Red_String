@@ -1,0 +1,12 @@
+{
+  "id": "silent-manor",
+  "title": "The Silent Manor",
+  "genre": "Locked Room Mystery",
+  "description": "The wealthy Arthur Blackwood is found dead at his desk inside a locked study. Rain pours outside as you hunt for the truth.",
+  "difficulty": 1,
+  "length": "1-2 hours",
+  "version": 1,
+  "engineVersion": 1,
+  "entryRoom": "study",
+  "modules": ["contradiction"]
+}

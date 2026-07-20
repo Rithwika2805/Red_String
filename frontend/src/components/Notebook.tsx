@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { X, Search, Pin, Trash2, Save, FileText, Sparkles, BookOpen } from 'lucide-react';
 
 export const Notebook: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { notes, saveNote, deleteNote, activeCaseId } = useGame();
+  const { notes, saveNote, deleteNote, activeCaseId, showConfirm } = useGame();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNote, setSelectedNote] = useState<any | null>(null);
@@ -46,8 +46,8 @@ export const Notebook: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleDelete = async (noteId: string) => {
     if (!activeCaseId) return;
-    const confirm = window.confirm('Delete this journal entry?');
-    if (!confirm) return;
+    const confirmDelete = await showConfirm('Delete this journal entry?');
+    if (!confirmDelete) return;
 
     await deleteNote(activeCaseId, noteId);
     setSelectedNote(null);

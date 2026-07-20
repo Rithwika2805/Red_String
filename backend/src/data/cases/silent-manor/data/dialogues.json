@@ -6,26 +6,33 @@
         {
           "text": "Where were you around 10:00 PM?",
           "next": "james_alibi_tea",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         },
         {
           "text": "Tell me about Arthur's relationship with Victor Hayes.",
           "next": "james_about_victor",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         },
         {
           "text": "Confront him about the glass vial found in the pantry.",
           "next": "james_pantry_confront",
-          "conditions": { "discovered_evidence": ["cyanide_vial"] },
-          "actions": { "advance_time": 20 }
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "cyanide_vial" }
+            ]
+          },
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 20 }
+          ]
         }
       ]
     },
     "james_alibi_tea": {
       "text": "I was in the kitchen preparing Mr. Blackwood's evening chamomile tea between 9:30 PM and 10:30 PM. I never left the kitchen area.",
-      "contradicts": {
-        "hallway_logs": "james_hallway_lie"
-      },
       "choices": [
         {
           "text": "Did Arthur drink the tea?",
@@ -52,7 +59,9 @@
         {
           "text": "What were they shouting about?",
           "next": "james_shouting_details",
-          "actions": { "add_evidence": "phone_logs" }
+          "effects": [
+            { "action": "unlock_evidence", "id": "phone_logs" }
+          ]
         },
         {
           "text": "Go back.",
@@ -95,26 +104,33 @@
         {
           "text": "What was your schedule last night?",
           "next": "victor_alibi",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         },
         {
           "text": "Arthur was auditing company records. What did he find?",
           "next": "victor_audit",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         },
         {
           "text": "Confront him with the charred letter from the fireplace.",
           "next": "victor_letter_confront",
-          "conditions": { "discovered_evidence": ["burned_letter"] },
-          "actions": { "advance_time": 20 }
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "burned_letter" }
+            ]
+          },
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 20 }
+          ]
         }
       ]
     },
     "victor_alibi": {
       "text": "I spent the entire night at my suburban residence in Elmwood, about an hour's drive from here. I was asleep by 9:30 PM.",
-      "contradicts": {
-        "security_footage": "victor_gate_lie"
-      },
       "choices": [
         {
           "text": "Can anyone verify your alibi?",
@@ -170,12 +186,16 @@
         {
           "text": "What can you tell me about Arthur's sleeping pills?",
           "next": "eleanor_pills",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         },
         {
           "text": "How was your relationship with Arthur recently?",
           "next": "eleanor_relationship",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         }
       ]
     },
@@ -190,9 +210,6 @@
     },
     "eleanor_relationship": {
       "text": "We had a stable, mature marriage. Of course, we had our disagreements, but nothing out of the ordinary.",
-      "contradicts": {
-        "will_draft": "eleanor_will_lie"
-      },
       "choices": [
         {
           "text": "Go back.",
@@ -217,20 +234,21 @@
         {
           "text": "What was your argument with Arthur yesterday about?",
           "next": "daniel_argument",
-          "actions": { "advance_time": 20 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 20 }
+          ]
         },
         {
           "text": "Where were you last night between 9 PM and 11 PM?",
           "next": "daniel_alibi",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         }
       ]
     },
     "daniel_argument": {
       "text": "He wanted me to join the firm and stop doing art auctions. I told him to stuff it. I don't care about his money anyway.",
-      "contradicts": {
-        "will_draft": "daniel_will_motive"
-      },
       "choices": [
         {
           "text": "Go back.",
@@ -264,7 +282,9 @@
         {
           "text": "Did Arthur plan to change his will?",
           "next": "sophia_will",
-          "actions": { "advance_time": 15 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 15 }
+          ]
         }
       ]
     },
@@ -294,7 +314,9 @@
         {
           "text": "What did you see near the study last night?",
           "next": "olivia_sight",
-          "actions": { "advance_time": 20 }
+          "effects": [
+            { "action": "increment", "path": "elapsed_time", "value": 20 }
+          ]
         }
       ]
     },
@@ -326,7 +348,9 @@
         {
           "text": "I will protect you. Thank you, Olivia.",
           "next": "root",
-          "actions": { "add_evidence": "hallway_logs" }
+          "effects": [
+            { "action": "unlock_evidence", "id": "hallway_logs" }
+          ]
         }
       ]
     }

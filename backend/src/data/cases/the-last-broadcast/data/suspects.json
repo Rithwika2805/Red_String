@@ -1,0 +1,32 @@
+{
+  "producer": {
+    "name": "David Miller",
+    "description": "Show Producer. Claims Elena planned to stage the blackout for ratings.",
+    "initial_suspicion": 15,
+    "threshold_reveal_suspect": 40
+  },
+  "camera_op": {
+    "name": "Ray Henderson",
+    "description": "Fired cameraman. Bitter and defensive.",
+    "initial_suspicion": 30,
+    "threshold_reveal_suspect": 50
+  },
+  "politician": {
+    "name": "Senator Sterling",
+    "description": "Corrupt politician Elena exposed last month.",
+    "initial_suspicion": 20,
+    "threshold_reveal_suspect": 45
+  },
+  "journalist": {
+    "name": "Julian Cole",
+    "description": "Elena's rival and co-host.",
+    "initial_suspicion": 10,
+    "threshold_reveal_suspect": 35
+  },
+  "security_chief": {
+    "name": "Marcus Vance",
+    "description": "Station Security Chief. Has master access to all panels.",
+    "initial_suspicion": 5,
+    "threshold_reveal_suspect": 30
+  }
+}

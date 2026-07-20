@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { GameModal } from '../components/GameModal';
 
 export interface Card {
   id: string;
@@ -24,6 +25,12 @@ interface GameContextType {
     evidence: any;
     suspects: any;
     exploration: any;
+    rooms: any;
+    hotspots: any;
+    interactables: any;
+    puzzles: any;
+    manifest: any;
+    contradictions: any;
   } | null;
   boardState: {
     cards: Card[];
@@ -49,6 +56,10 @@ interface GameContextType {
   saveNote: (caseId: string, note: { id?: string; title: string; content: string; pinned?: boolean }) => Promise<void>;
   deleteNote: (caseId: string, noteId: string) => Promise<void>;
   submitAccusation: (caseId: string, accusationPayload: any) => Promise<any>;
+  solvePuzzle: (caseId: string, puzzleId: string, answer: any) => Promise<any>;
+  showAlert: (message: string) => Promise<void>;
+  showConfirm: (message: string) => Promise<boolean>;
+  showPrompt: (message: string, defaultValue?: string) => Promise<string | null>;
   triggerAudio: (soundType: 'pin' | 'paper' | 'string' | 'stamp' | 'typewriter' | 'door') => void;
 }
 
@@ -61,6 +72,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [definitions, setDefinitions] = useState<any | null>(null);
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [activeModal, setActiveModal] = useState<{
+    type: 'alert' | 'confirm' | 'prompt';
+    message: string;
+    defaultValue?: string;
+    resolve: (val: any) => void;
+  } | null>(null);
+
+  const showAlert = useCallback((message: string): Promise<void> => {
+    return new Promise((resolve) => {
+      setActiveModal({ type: 'alert', message, resolve });
+    });
+  }, []);
+
+  const showConfirm = useCallback((message: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setActiveModal({ type: 'confirm', message, resolve });
+    });
+  }, []);
+
+  const showPrompt = useCallback((message: string, defaultValue?: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      setActiveModal({ type: 'prompt', message, defaultValue, resolve });
+    });
+  }, []);
   const [boardState, setBoardState] = useState<{
     cards: Card[];
     connections: Connection[];
@@ -175,15 +211,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       } else {
         const errorData = await res.json();
-        alert(`Failed to load case progress: ${errorData.error || 'Unknown error'}`);
+        showAlert(`Failed to load case progress: ${errorData.error || 'Unknown error'}`);
         return false;
       }
     } catch (err) {
       console.error('Error fetching progress:', err);
-      alert('Error loading case progress: network or database connection failure.');
+      showAlert('Error loading case progress: network or database connection failure.');
       return false;
     }
-  }, [token]);
+  }, [token, showAlert]);
 
   const startCase = async (caseId: string) => {
     if (!token) return false;
@@ -200,12 +236,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       } else {
         const errorData = await res.json();
-        alert(`Failed to start case: ${errorData.error || 'Unknown error'}`);
+        showAlert(`Failed to start case: ${errorData.error || 'Unknown error'}`);
         return false;
       }
     } catch (err) {
       console.error('Error starting case:', err);
-      alert('Error starting case: network or database connection failure.');
+      showAlert('Error starting case: network or database connection failure.');
       return false;
     } finally {
       setLoading(false);
@@ -376,6 +412,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const solvePuzzle = async (caseId: string, puzzleId: string, answer: any) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`/api/cases/${caseId}/puzzles/${puzzleId}/solve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ answer }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerAudio('stamp');
+        await fetchProgress(caseId);
+        await fetchNotes(caseId);
+      }
+      return data;
+    } catch (err) {
+      console.error('Error solving puzzle:', err);
+    }
+  };
+
+
+
   return (
     <GameContext.Provider
       value={{
@@ -395,10 +456,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         saveNote,
         deleteNote,
         submitAccusation,
+        solvePuzzle,
+        showAlert,
+        showConfirm,
+        showPrompt,
         triggerAudio,
       }}
     >
       {children}
+      {activeModal && (
+        <GameModal
+          type={activeModal.type}
+          message={activeModal.message}
+          defaultValue={activeModal.defaultValue}
+          onClose={(value) => {
+            activeModal.resolve(value);
+            setActiveModal(null);
+          }}
+        />
+      )}
     </GameContext.Provider>
   );
 };

@@ -11,10 +11,11 @@ import CaseSelector from './CaseSelector';
 
 export const Office: React.FC = () => {
   const { logout, user } = useAuth();
-  const { progress, activeCaseId, triggerAudio } = useGame();
+  const { progress, activeCaseId, triggerAudio, showAlert } = useGame();
   
   // Active overlay state: 'board' | 'notebook' | 'investigation' | 'inventory' | 'accusation' | 'cases' | null
   const [activeOverlay, setActiveOverlay] = useState<'board' | 'notebook' | 'investigation' | 'inventory' | 'accusation' | 'cases' | null>('cases');
+  const [investigationTab, setInvestigationTab] = useState<'rooms' | 'board' | 'interview' | 'analysis'>('rooms');
 
   const formatGameTime = (minutesElapsed: number) => {
     // Game starts at 9:00 PM (21:00)
@@ -26,11 +27,19 @@ export const Office: React.FC = () => {
 
   const handleObjectClick = (overlay: 'board' | 'notebook' | 'investigation' | 'inventory' | 'accusation' | 'cases') => {
     if (!activeCaseId && overlay !== 'cases') {
-      alert('Please open Case Files first and start a mystery!');
+      showAlert('Please open Case Files first and start a mystery!');
       return;
     }
     triggerAudio('paper');
-    setActiveOverlay(overlay);
+    if (overlay === 'board') {
+      setInvestigationTab('board');
+      setActiveOverlay('investigation');
+    } else if (overlay === 'investigation') {
+      setInvestigationTab('rooms');
+      setActiveOverlay('investigation');
+    } else {
+      setActiveOverlay(overlay);
+    }
   };
 
   return (
@@ -189,7 +198,7 @@ export const Office: React.FC = () => {
         <Notebook onClose={() => setActiveOverlay(null)} />
       )}
       {activeOverlay === 'investigation' && (
-        <Investigation onClose={() => setActiveOverlay(null)} />
+        <Investigation onClose={() => setActiveOverlay(null)} initialTab={investigationTab} />
       )}
       {activeOverlay === 'inventory' && (
         <Inventory onClose={() => setActiveOverlay(null)} />

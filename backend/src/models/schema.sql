@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS journal_entries CASCADE;
 DROP TABLE IF EXISTS board_state CASCADE;
 DROP TABLE IF EXISTS user_progress CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
 
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
@@ -21,15 +21,13 @@ CREATE TABLE IF NOT EXISTS user_progress (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     case_id VARCHAR(100) NOT NULL,
     case_type VARCHAR(100) NOT NULL,
-    elapsed_time INT DEFAULT 0, -- minutes passed since case start (e.g. 9:00 PM = 0)
-    randomized_variables JSONB NOT NULL DEFAULT '{}'::jsonb, -- e.g. safe codes, keys placement
+    elapsed_time INT DEFAULT 0, -- minutes passed since case start
+    world_state JSONB NOT NULL DEFAULT '{}'::jsonb, -- e.g. {"trust_producer": 3, "timeline_solved": true}
     inventory JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['pocket_watch', 'drawer_key']
     discovered_evidence JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['broken_watch']
-    discovered_contradictions JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['james_lies_study']
-    unlocked_dialogues JSONB NOT NULL DEFAULT '[]'::jsonb, -- accessed choice paths
-    unlocked_people JSONB NOT NULL DEFAULT '[]'::jsonb, -- people discovered (name, suspect: boolean)
-    revealed_suspicion_meters JSONB NOT NULL DEFAULT '[]'::jsonb, -- names of suspects whose meter is visible
-    unlocked_scenes JSONB NOT NULL DEFAULT '[]'::jsonb, -- list of rooms/nodes visible
+    completed_puzzles JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. ['timeline_reconstruct']
+    save_version INT DEFAULT 2,
+    case_version INT DEFAULT 1,
     hints_used INT DEFAULT 0,
     completed BOOLEAN DEFAULT FALSE,
     score INT DEFAULT 0,
@@ -39,12 +37,12 @@ CREATE TABLE IF NOT EXISTS user_progress (
 );
 
 -- Board State Table
--- Tracks coordinates and red string threads of the detective pinboard.
+-- Tracks nodes and edges of the detective corkboard knowledge graph.
 CREATE TABLE IF NOT EXISTS board_state (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     case_id VARCHAR(100) NOT NULL,
-    cards JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. [{id, type, x, y}]
-    connections JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. [{id, sourceId, targetId, note, color}]
+    nodes JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. [{id, type, label, x, y}]
+    edges JSONB NOT NULL DEFAULT '[]'::jsonb, -- e.g. [{id, sourceId, targetId, label, color}]
     zoom FLOAT DEFAULT 1.0,
     pan JSONB NOT NULL DEFAULT '{"x": 0, "y": 0}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

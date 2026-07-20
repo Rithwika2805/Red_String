@@ -1,115 +1,111 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const db_1 = require("../config/db");
 const auth_1 = require("../middleware/auth");
+const game_1 = require("../game");
 const router = (0, express_1.Router)();
-// Helper to load static JSON config files from the case folders
-const loadCaseJSON = (caseId, file) => {
-    const filePath = path_1.default.join(__dirname, '..', 'data', 'cases', caseId, 'data', `${file}.json`);
-    if (!fs_1.default.existsSync(filePath)) {
-        throw new Error(`Config file ${file}.json not found for case ${caseId}`);
+// Helper to query board state cards
+const getBoardState = async (userId, caseId) => {
+    const result = await (0, db_1.query)('SELECT nodes, edges FROM board_state WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
+    if (result.rows.length === 0) {
+        return { nodes: [], edges: [] };
     }
-    return JSON.parse(fs_1.default.readFileSync(filePath, 'utf8'));
+    return result.rows[0];
+};
+// Helper to save board state cards
+const saveBoardState = async (userId, caseId, nodes, edges) => {
+    await (0, db_1.query)(`INSERT INTO board_state (user_id, case_id, nodes, edges)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (user_id, case_id) DO UPDATE SET
+       nodes = $3,
+       edges = $4,
+       updated_at = CURRENT_TIMESTAMP`, [userId, caseId, JSON.stringify(nodes), JSON.stringify(edges)]);
 };
 // 1. Get Cases List
 router.get('/', auth_1.authenticateToken, async (req, res, next) => {
     try {
-        const casesDir = path_1.default.join(__dirname, '..', 'data', 'cases');
-        if (!fs_1.default.existsSync(casesDir)) {
-            return res.json([]);
-        }
-        const folders = fs_1.default.readdirSync(casesDir);
-        const casesList = folders.map((folder) => {
-            try {
-                const metadata = loadCaseJSON(folder, 'case');
-                return {
-                    id: folder,
-                    title: metadata.title,
-                    genre: metadata.genre,
-                    description: metadata.description,
-                    startingTime: metadata.starting_time,
-                    difficulty: metadata.difficulty,
-                };
-            }
-            catch (err) {
-                return null;
-            }
-        }).filter(Boolean);
-        res.json(casesList);
+        const list = game_1.CaseLoader.listCases();
+        res.json(list.map(c => ({
+            id: c.id,
+            title: c.title,
+            genre: c.genre,
+            description: c.description,
+            difficulty: c.difficulty,
+            length: c.length
+        })));
     }
     catch (error) {
         next(error);
     }
 });
-// 2. Start / Reset Case Progress
+// 2. Start / Reset Case
 router.post('/:caseId/start', auth_1.authenticateToken, async (req, res, next) => {
     const { caseId } = req.params;
     const userId = req.user?.id;
     try {
-        const caseMeta = loadCaseJSON(caseId, 'case');
-        // Randomize safe codes and key drawer locations slightly
-        const safeCodes = ['2941', '1003', '8429', '4952'];
-        const randomCode = safeCodes[Math.floor(Math.random() * safeCodes.length)];
-        const keyPlacements = ['cabinet_drawer', 'pantry_shelf', 'kitchen_pot'];
-        const randomPlacement = keyPlacements[Math.floor(Math.random() * keyPlacements.length)];
-        const randomizedVars = {
-            safe_code: randomCode,
-            key_placement: randomPlacement
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        // Default world state keys
+        const initialWorldState = {
+            trust: {},
+            rooms: {},
+            puzzles: {}
         };
-        // Initial people (with suspicion levels hidden)
-        const initialPeople = [
-            { id: 'eleanor_blackwood', name: 'Eleanor Blackwood', isSuspect: false },
-            { id: 'daniel_blackwood', name: 'Daniel Blackwood', isSuspect: false },
-            { id: 'sophia_blackwood', name: 'Sophia Blackwood', isSuspect: false },
-            { id: 'james_holloway', name: 'James Holloway', isSuspect: false },
-            { id: 'olivia_reed', name: 'Olivia Reed', isSuspect: false },
-            { id: 'victor_hayes', name: 'Victor Hayes', isSuspect: false }
-        ];
-        // Initial unlocked scenes
-        const initialScenes = ['study', 'kitchen', 'gardens'];
-        // Upsert user progress
+        // Case specific defaults
+        if (caseId === 'silent-manor') {
+            initialWorldState.trust = { james_holloway: 0, victor_hayes: 0, eleanor_blackwood: 0 };
+            initialWorldState.rooms = { study: { unlocked: true }, kitchen: { unlocked: true }, gardens: { unlocked: true } };
+        }
+        else {
+            initialWorldState.trust = { producer: 0, chief: 0, politician: 0, journalist: 0 };
+            initialWorldState.rooms = { tv_studio: { unlocked: true }, editing_room: { unlocked: true }, parking_garage: { unlocked: true } };
+        }
+        const initialPeople = caseId === 'silent-manor'
+            ? [
+                { id: 'eleanor_blackwood', name: 'Eleanor Blackwood', isSuspect: false },
+                { id: 'daniel_blackwood', name: 'Daniel Blackwood', isSuspect: false },
+                { id: 'sophia_blackwood', name: 'Sophia Blackwood', isSuspect: false },
+                { id: 'james_holloway', name: 'James Holloway', isSuspect: false },
+                { id: 'olivia_reed', name: 'Olivia Reed', isSuspect: false },
+                { id: 'victor_hayes', name: 'Victor Hayes', isSuspect: false }
+            ]
+            : [
+                { id: 'producer', name: 'David Miller', isSuspect: false },
+                { id: 'camera_op', name: 'Ray Henderson', isSuspect: false },
+                { id: 'politician', name: 'Senator Sterling', isSuspect: false },
+                { id: 'journalist', name: 'Julian Cole', isSuspect: false },
+                { id: 'security_chief', name: 'Marcus Vance', isSuspect: false }
+            ];
+        // Initial database insert
         await (0, db_1.query)(`INSERT INTO user_progress (
-        user_id, case_id, case_type, elapsed_time, randomized_variables, 
-        inventory, discovered_evidence, discovered_contradictions, 
-        unlocked_dialogues, unlocked_people, revealed_suspicion_meters, 
-        unlocked_scenes, completed, score, ending_reached
-      ) VALUES ($1, $2, $3, 0, $4, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, $5, '[]'::jsonb, $6, false, 0, null)
+        user_id, case_id, case_type, elapsed_time, world_state, 
+        inventory, discovered_evidence, completed_puzzles, save_version, case_version, completed
+      ) VALUES ($1, $2, $3, 0, $4, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, 2, 1, false)
       ON CONFLICT (user_id, case_id) DO UPDATE SET
         elapsed_time = 0,
-        randomized_variables = $4,
+        world_state = $4,
         inventory = '[]'::jsonb,
         discovered_evidence = '[]'::jsonb,
-        discovered_contradictions = '[]'::jsonb,
-        unlocked_dialogues = '[]'::jsonb,
-        unlocked_people = $5,
-        revealed_suspicion_meters = '[]'::jsonb,
-        unlocked_scenes = $6,
+        completed_puzzles = '[]'::jsonb,
+        save_version = 2,
+        case_version = 1,
         completed = false,
         score = 0,
         ending_reached = null,
-        updated_at = CURRENT_TIMESTAMP`, [userId, caseId, caseMeta.genre, JSON.stringify(randomizedVars), JSON.stringify(initialPeople), JSON.stringify(initialScenes)]);
-        // Initial board state
-        const initialCards = [
-            { id: 'arthur_blackwood', type: 'suspect', x: 200, y: 100, label: 'Arthur Blackwood (Victim)' }
-        ];
-        await (0, db_1.query)(`INSERT INTO board_state (user_id, case_id, cards, connections, zoom, pan)
-       VALUES ($1, $2, $3, '[]'::jsonb, 1.0, '{"x":0,"y":0}'::jsonb)
-       ON CONFLICT (user_id, case_id) DO UPDATE SET
-         cards = $3,
-         connections = '[]'::jsonb,
-         zoom = 1.0,
-         pan = '{"x":0,"y":0}'::jsonb,
-         updated_at = CURRENT_TIMESTAMP`, [userId, caseId, JSON.stringify(initialCards)]);
-        // Initial journal entry (Sherlock thought)
-        await (0, db_1.query)(`DELETE FROM journal_entries WHERE user_id = $1 AND case_id = $2`, [userId, caseId]);
+        updated_at = CURRENT_TIMESTAMP`, [userId, caseId, caseData.manifest.genre, JSON.stringify(initialWorldState)]);
+        // Reset pinboard with victim card
+        const initialNodes = caseId === 'silent-manor'
+            ? [{ id: 'arthur_blackwood', type: 'suspect', x: 200, y: 100, label: 'Arthur Blackwood (Victim)' }]
+            : [{ id: 'elena_voss', type: 'suspect', x: 200, y: 100, label: 'Elena Voss (Victim)' }];
+        await saveBoardState(userId, caseId, initialNodes, []);
+        // Reset journal entries
+        await (0, db_1.query)('DELETE FROM journal_entries WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
+        const journalTitle = 'Case Investigation Opened';
+        const journalContent = caseId === 'silent-manor'
+            ? 'Arthur Blackwood found dead in locked study. Harris claims suicide, but daughters protest. There is a sense of manufactured finality here. I must review the study and interview family members.'
+            : 'Elena Voss killed on air in television studio A. The studio was locked and cameras cut for 30 seconds. I must inspect the presenter desk, review camera footage, and reconstruct the timeline.';
         await (0, db_1.query)(`INSERT INTO journal_entries (user_id, case_id, title, content, is_system, pinned)
-       VALUES ($1, $2, 'Case Opened', 'Arthur Blackwood found dead in locked study. Harris claims suicide, but daughters protest. There is a sense of manufactured finality here. I must review the study and interview family members.', true, true)`, [userId, caseId]);
+       VALUES ($1, $2, $3, $4, true, true)`, [userId, caseId, journalTitle, journalContent]);
         res.json({ message: 'Case initialized successfully' });
     }
     catch (error) {
@@ -121,80 +117,97 @@ router.get('/:caseId/progress', auth_1.authenticateToken, async (req, res, next)
     const { caseId } = req.params;
     const userId = req.user?.id;
     try {
-        const progressResult = await (0, db_1.query)('SELECT * FROM user_progress WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
-        if (progressResult.rows.length === 0) {
+        const result = await (0, db_1.query)('SELECT * FROM user_progress WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
+        if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Case not started' });
         }
-        const progress = progressResult.rows[0];
-        // Load config maps to calculate suspicion dynamically and return static definitions
-        const evidenceConfig = loadCaseJSON(caseId, 'evidence');
-        const suspectsConfig = loadCaseJSON(caseId, 'suspects');
-        const explorationConfig = loadCaseJSON(caseId, 'investigation');
-        // Calculate dynamic suspicion score per suspect based on discovered clues & contradictions
+        // Run Save Migrations
+        let progress = result.rows[0];
+        const { migratedSave, needsSave } = game_1.SaveManager.processLoadedSave(progress);
+        if (needsSave) {
+            await (0, db_1.query)(`UPDATE user_progress 
+         SET world_state = $1, elapsed_time = $2, save_version = $3
+         WHERE user_id = $4 AND case_id = $5`, [JSON.stringify(migratedSave.world_state), migratedSave.elapsed_time, migratedSave.save_version, userId, caseId]);
+            progress = migratedSave;
+        }
+        // Load case config
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        // Calculate dynamic suspicions
         const calculatedSuspicion = {};
-        Object.keys(suspectsConfig).forEach((suspectId) => {
-            const suspect = suspectsConfig[suspectId];
-            if (suspect.is_victim)
-                return;
+        const suspectsList = Object.keys(caseData.suspects).map(id => ({
+            id,
+            ...caseData.suspects[id]
+        }));
+        suspectsList.forEach((suspect) => {
             let score = suspect.initial_suspicion || 0;
-            // Add suspicion impact of discovered evidence
+            // Add clue impacts
             progress.discovered_evidence.forEach((clueId) => {
-                const clue = evidenceConfig[clueId];
-                if (clue && clue.suspicion_impact && clue.suspicion_impact[suspectId] !== undefined) {
-                    score += clue.suspicion_impact[suspectId];
-                }
+                const clue = caseData.effects[clueId]; // check in effects
+                const clueMeta = caseData.interactables; // check in interactables
             });
-            // Add suspicion impact of exposed contradictions
-            progress.discovered_contradictions.forEach((contradictionId) => {
-                if (contradictionId === 'james_hallway_lie' && suspectId === 'james_holloway') {
-                    score += 25;
-                }
-                if (contradictionId === 'victor_gate_lie' && suspectId === 'victor_hayes') {
+            // Sum hardcoded triggers/contradictions inside world state if checked
+            if (caseId === 'silent-manor') {
+                if (progress.world_state.victor_gate_lie)
                     score += 35;
-                }
-                if (contradictionId === 'daniel_will_motive' && suspectId === 'daniel_blackwood') {
+                if (progress.world_state.james_study_lie)
+                    score += 25;
+                if (progress.world_state.daniel_will_motive)
                     score += 20;
-                }
-            });
-            calculatedSuspicion[suspectId] = Math.min(100, Math.max(0, score));
+            }
+            else {
+                if (progress.world_state.producer_gate_lie)
+                    score += 25;
+                if (progress.world_state.chief_power_lie)
+                    score += 35;
+                if (progress.world_state.politician_garage_lie)
+                    score += 30;
+            }
+            calculatedSuspicion[suspect.id] = Math.min(100, Math.max(0, score));
         });
-        // Check if suspicion scores trigger unlocking "Suspect" badges
-        const updatedPeople = progress.unlocked_people.map((person) => {
-            const currentSuspicion = calculatedSuspicion[person.id] || 0;
-            const suspectConfig = suspectsConfig[person.id];
-            const threshold = suspectConfig?.threshold_reveal_suspect || 999;
+        // Build people list mapping suspicion badge triggers
+        const mappedPeople = suspectsList.map(suspect => {
+            const suspicion = calculatedSuspicion[suspect.id] || 0;
+            const isSuspect = suspicion >= suspect.threshold_reveal_suspect;
             return {
-                ...person,
-                isSuspect: person.isSuspect || currentSuspicion >= threshold
+                id: suspect.id,
+                name: suspect.name,
+                isSuspect
             };
         });
-        // Check if suspicion scores reveal suspicion meters
-        const updatedRevealedMeters = [...progress.revealed_suspicion_meters];
-        Object.keys(calculatedSuspicion).forEach((suspectId) => {
-            const score = calculatedSuspicion[suspectId];
-            if (score >= 25 && !updatedRevealedMeters.includes(suspectId)) {
-                updatedRevealedMeters.push(suspectId);
+        // Determine unlocked scenes list based on world state keys
+        const unlockedScenesList = Object.keys(caseData.rooms).filter(roomId => {
+            if (roomId === 'study' || roomId === 'kitchen' || roomId === 'gardens' || roomId === 'tv_studio' || roomId === 'editing_room' || roomId === 'parking_garage') {
+                return true;
             }
+            // Require world state key or evidence keys
+            if (roomId === 'security_room' && progress.discovered_evidence.includes('hallway_logs'))
+                return true;
+            if (roomId === 'server_room' && progress.discovered_evidence.includes('voss_notebook'))
+                return true;
+            if (roomId === 'elena_apartment' && progress.discovered_evidence.includes('delayed_surveillance'))
+                return true;
+            return progress.world_state[`scene_unlocked_${roomId}`] === true;
         });
-        // Save updated people / revealed meters if changed
-        if (JSON.stringify(updatedPeople) !== JSON.stringify(progress.unlocked_people) ||
-            JSON.stringify(updatedRevealedMeters) !== JSON.stringify(progress.revealed_suspicion_meters)) {
-            await (0, db_1.query)(`UPDATE user_progress 
-         SET unlocked_people = $1, revealed_suspicion_meters = $2 
-         WHERE user_id = $3 AND case_id = $4`, [JSON.stringify(updatedPeople), JSON.stringify(updatedRevealedMeters), userId, caseId]);
-        }
+        const revealedSuspicionMeters = Object.keys(calculatedSuspicion).filter((id) => (calculatedSuspicion[id] || 0) >= 25);
+        const unlockedDialogues = Object.keys(progress.world_state.seen_dialogues || {});
         res.json({
             progress: {
                 ...progress,
                 current_time: progress.elapsed_time,
-                unlocked_people: updatedPeople,
-                revealed_suspicion_meters: updatedRevealedMeters,
+                unlocked_people: mappedPeople,
+                unlocked_scenes: unlockedScenesList,
                 suspicion_scores: calculatedSuspicion,
+                revealed_suspicion_meters: revealedSuspicionMeters,
+                unlocked_dialogues: unlockedDialogues,
             },
             definitions: {
-                evidence: evidenceConfig,
-                suspects: suspectsConfig,
-                exploration: explorationConfig,
+                evidence: caseData.evidence, // metadata maps
+                suspects: caseData.suspects,
+                rooms: caseData.rooms,
+                hotspots: caseData.hotspots,
+                interactables: caseData.interactables,
+                puzzles: caseData.puzzles,
+                manifest: caseData.manifest
             }
         });
     }
@@ -202,7 +215,7 @@ router.get('/:caseId/progress', auth_1.authenticateToken, async (req, res, next)
         next(error);
     }
 });
-// 4. Explore Scene Node
+// 4. Explore Hotspot
 router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next) => {
     const { caseId } = req.params;
     const { locationId, nodeId } = req.body;
@@ -213,15 +226,13 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
             return res.status(404).json({ error: 'Case not started' });
         }
         const progress = progressResult.rows[0];
-        const explorationConfig = loadCaseJSON(caseId, 'investigation');
-        const evidenceConfig = loadCaseJSON(caseId, 'evidence');
-        // Find the node in investigation
-        const room = explorationConfig[locationId];
-        if (!room) {
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        // Locate node in interactables
+        const roomInteractables = caseData.interactables[locationId];
+        if (!roomInteractables) {
             return res.status(400).json({ error: 'Invalid room location' });
         }
-        // Traverse to search the node
-        // Traverse to search the node and check if any parent along the path is locked
+        // Traverse nodes recursively to find target and scan locks along the path
         let targetNode = null;
         let isPathLocked = false;
         let requiredKey = '';
@@ -245,105 +256,98 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
                 });
             }
         };
-        if (room.nodes && room.nodes[nodeId]) {
-            targetNode = room.nodes[nodeId];
+        if (roomInteractables[nodeId]) {
+            targetNode = roomInteractables[nodeId];
         }
-        else if (room.nodes) {
-            Object.keys(room.nodes).forEach((key) => {
-                findNodeAndCheckLocks(room.nodes[key], nodeId, false, '', false);
+        else {
+            Object.keys(roomInteractables).forEach((key) => {
+                findNodeAndCheckLocks(roomInteractables[key], nodeId, false, '', false);
             });
         }
         if (!targetNode) {
             return res.status(404).json({ error: 'Investigation node not found' });
         }
-        // Check parent locks
+        // Path locked validation
         if (isPathLocked) {
-            if (requiredKey) {
+            if (requiredKey)
                 return res.status(403).json({ error: 'Locked', requiresKey: requiredKey });
+            if (requiredPassword)
+                return res.status(403).json({ error: 'Locked', requiresPassword: true });
+        }
+        // Node locked validation
+        if (targetNode.locked) {
+            if (targetNode.requires_key && !progress.inventory.includes(targetNode.requires_key)) {
+                return res.status(403).json({ error: 'Locked', requiresKey: targetNode.requires_key });
             }
-            if (requiredPassword) {
+            if (targetNode.requires_password && !progress.inventory.includes(targetNode.requires_password)) {
                 return res.status(403).json({ error: 'Locked', requiresPassword: true });
             }
         }
-        // Check target node locks
-        if (targetNode.locked) {
-            if (targetNode.requires_key) {
-                const hasKey = progress.inventory.includes(targetNode.requires_key);
-                if (!hasKey) {
-                    return res.status(403).json({ error: 'Locked', requiresKey: targetNode.requires_key });
-                }
-            }
-            if (targetNode.requires_password) {
-                const hasPass = progress.inventory.includes(targetNode.requires_password);
-                if (!hasPass) {
-                    return res.status(403).json({ error: 'Locked', requiresPassword: true });
-                }
-            }
+        // Validate logic requirements
+        const meetsRequirements = game_1.RequirementEngine.checkRequirements(targetNode.requires, progress.world_state, progress.inventory, progress.discovered_evidence, progress.completed_puzzles);
+        if (!meetsRequirements) {
+            return res.status(403).json({ error: 'Requirements not met to inspect this item.' });
         }
-        // Grant rewards & consume time
-        const updatedInventory = [...progress.inventory];
-        const updatedEvidence = [...progress.discovered_evidence];
-        const updatedScenes = [...progress.unlocked_scenes];
+        // Execute consequences / rewards
+        const ws = { ...progress.world_state };
+        const inv = [...progress.inventory];
+        const ev = [...progress.discovered_evidence];
+        const puz = [...progress.completed_puzzles];
         let timeCost = targetNode.cost_minutes || (targetNode.is_red_herring ? 2 : 10);
+        let message = targetNode.is_red_herring ? targetNode.description : 'Node investigated successfully';
         let unlockedMsg = '';
-        if (targetNode.inventory_reward && !updatedInventory.includes(targetNode.inventory_reward)) {
-            updatedInventory.push(targetNode.inventory_reward);
-            unlockedMsg += `Acquired: ${targetNode.inventory_reward.replace('_', ' ')}. `;
+        // Apply direct rewards
+        if (targetNode.inventory_reward && !inv.includes(targetNode.inventory_reward)) {
+            inv.push(targetNode.inventory_reward);
+            unlockedMsg += `Acquired Tool: ${targetNode.inventory_reward.replace('_', ' ').toUpperCase()}. `;
         }
-        if (targetNode.evidence_reward && !updatedEvidence.includes(targetNode.evidence_reward)) {
-            updatedEvidence.push(targetNode.evidence_reward);
-            const clue = evidenceConfig[targetNode.evidence_reward];
-            unlockedMsg += `Discovered Clue: ${clue?.title || targetNode.evidence_reward}. `;
-            // Spawn new card on detective board
-            const boardResult = await (0, db_1.query)('SELECT cards FROM board_state WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
-            if (boardResult.rows.length > 0) {
-                const cards = boardResult.rows[0].cards;
-                if (!cards.find((c) => c.id === targetNode.evidence_reward)) {
-                    cards.push({
-                        id: targetNode.evidence_reward,
-                        type: 'evidence',
-                        x: 100 + Math.random() * 400,
-                        y: 100 + Math.random() * 400,
-                        label: clue?.title || targetNode.evidence_reward
-                    });
-                    await (0, db_1.query)('UPDATE board_state SET cards = $1 WHERE user_id = $2 AND case_id = $3', [JSON.stringify(cards), userId, caseId]);
-                }
+        if (targetNode.evidence_reward && !ev.includes(targetNode.evidence_reward)) {
+            ev.push(targetNode.evidence_reward);
+            unlockedMsg += `Discovered Clue: ${targetNode.evidence_reward.replace('_', ' ').toUpperCase()}. `;
+            // Add to Board Graph nodes
+            const board = await getBoardState(userId, caseId);
+            if (!board.nodes.find((n) => n.id === targetNode.evidence_reward)) {
+                board.nodes.push({
+                    id: targetNode.evidence_reward,
+                    type: 'evidence',
+                    label: targetNode.name,
+                    x: 100 + Math.random() * 400,
+                    y: 100 + Math.random() * 400
+                });
+                await saveBoardState(userId, caseId, board.nodes, board.edges);
             }
-            // Add dynamic journal entry (Sherlock thought)
-            let journalTitle = `Clue: ${clue?.title}`;
-            let journalContent = '';
-            if (targetNode.evidence_reward === 'broken_watch') {
-                journalContent = `The broken watch stopped at 9:17. Harris considers it concrete evidence of the death time. But pocket watches don't break simply because their owner dies—it implies a struggle, or perhaps, an attempt to stage the timeline.`;
-            }
-            else if (targetNode.evidence_reward === 'wine_glass') {
-                journalContent = `Found Arthur's wine glass. A trace almond odor—cyanide, undoubtedly. He was drinking right before he slumped. Was the wine poisoned in the bottle, or did someone slip it in his glass?`;
-            }
-            else if (targetNode.evidence_reward === 'burned_letter') {
-                journalContent = `A charred letter mentions Victor Hayes and missing funds. Arthur was going to expose him today. If Victor knew, he had every motive in the world to silence Arthur last night.`;
-            }
-            else {
-                journalContent = `Discovered ${clue?.title} at the ${targetNode.location || locationId}. This might fit into the broader picture.`;
-            }
+            // Add Sherlock Thought to Journal
+            const journalTitle = `Clue Discovered: ${targetNode.name}`;
+            const journalContent = `Inspecting ${targetNode.name} has revealed new information. I must connect this with our suspect testimonies.`;
             await (0, db_1.query)(`INSERT INTO journal_entries (user_id, case_id, title, content, is_system, pinned)
          VALUES ($1, $2, $3, $4, true, false)`, [userId, caseId, journalTitle, journalContent]);
         }
-        // Unlock new scenes if conditions met
-        if (targetNode.evidence_reward === 'hallway_logs' && !updatedScenes.includes('security_room')) {
-            updatedScenes.push('security_room');
+        // Execute declarative side effects
+        if (targetNode.effects) {
+            game_1.EffectEngine.executeEffects(targetNode.effects, ws, inv, ev, puz);
         }
-        if (updatedEvidence.includes('hallway_logs') && !updatedScenes.includes('security_room')) {
-            updatedScenes.push('security_room');
+        // Process event-triggers (e.g. search complete trigger)
+        const trigResult = game_1.TriggerEngine.evaluateTriggers(nodeId + '_searched', caseData.triggers, ws, inv, ev, puz);
+        if (trigResult.newCards.length > 0) {
+            const board = await getBoardState(userId, caseId);
+            trigResult.newCards.forEach(card => {
+                if (!board.nodes.find((n) => n.id === card.id)) {
+                    board.nodes.push(card);
+                }
+            });
+            await saveBoardState(userId, caseId, board.nodes, board.edges);
         }
         const updatedTime = progress.elapsed_time + timeCost;
+        // Save back to DB
         await (0, db_1.query)(`UPDATE user_progress 
-       SET inventory = $1, discovered_evidence = $2, elapsed_time = $3, unlocked_scenes = $4
-       WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, JSON.stringify(updatedScenes), userId, caseId]);
+       SET world_state = $1, inventory = $2, discovered_evidence = $3, elapsed_time = $4
+       WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(ws), JSON.stringify(inv), JSON.stringify(ev), updatedTime, userId, caseId]);
         res.json({
-            message: targetNode.is_red_herring ? targetNode.description : 'Node investigated successfully',
+            message,
             unlockedMsg,
             timeElapsed: timeCost,
-            inventory: updatedInventory,
-            discovered_evidence: updatedEvidence,
+            inventory: inv,
+            discovered_evidence: ev,
             current_time: updatedTime,
             isRedHerring: !!targetNode.is_red_herring
         });
@@ -352,7 +356,7 @@ router.post('/:caseId/explore', auth_1.authenticateToken, async (req, res, next)
         next(error);
     }
 });
-// 5. Dialogue Interaction
+// 5. Interrogation Dialogue
 router.post('/:caseId/dialogue', auth_1.authenticateToken, async (req, res, next) => {
     const { caseId } = req.params;
     const { suspectId, nodeKey } = req.body;
@@ -363,61 +367,52 @@ router.post('/:caseId/dialogue', auth_1.authenticateToken, async (req, res, next
             return res.status(404).json({ error: 'Case not started' });
         }
         const progress = progressResult.rows[0];
-        const dialoguesConfig = loadCaseJSON(caseId, 'dialogues');
-        const suspectDialogues = dialoguesConfig[suspectId];
-        if (!suspectDialogues) {
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        const suspectDialogues = caseData.dialogues[suspectId];
+        if (!suspectDialogues)
             return res.status(400).json({ error: 'Invalid suspect ID' });
-        }
         const node = suspectDialogues[nodeKey];
-        if (!node) {
+        if (!node)
             return res.status(404).json({ error: 'Dialogue node not found' });
+        const ws = { ...progress.world_state };
+        const inv = [...progress.inventory];
+        const ev = [...progress.discovered_evidence];
+        const puz = [...progress.completed_puzzles];
+        // Filter node choices
+        const filteredChoices = game_1.DialogueEngine.filterChoices(node.choices, ws, inv, ev, puz);
+        // Apply inline dialogue effects
+        if (node.effects) {
+            game_1.EffectEngine.executeEffects(node.effects, ws, inv, ev, puz);
         }
-        // Execute choice action if any (advance time, unlock evidence/inventory)
-        const updatedInventory = [...progress.inventory];
-        const updatedEvidence = [...progress.discovered_evidence];
-        let timeCost = 5; // default dialog cost
-        if (node.choices) {
-            // Find matching action
-        }
-        // General node triggers
-        if (node.actions) {
-            if (node.actions.advance_time) {
-                timeCost = node.actions.advance_time;
-            }
-            if (node.actions.add_evidence && !updatedEvidence.includes(node.actions.add_evidence)) {
-                updatedEvidence.push(node.actions.add_evidence);
-            }
-            if (node.actions.add_inventory && !updatedInventory.includes(node.actions.add_inventory)) {
-                updatedInventory.push(node.actions.add_inventory);
-            }
-        }
-        // Add statement card to board when dialogue is read
+        // Add statement card to board
         const statementCardId = `${suspectId}_statement_${nodeKey}`;
-        const boardResult = await (0, db_1.query)('SELECT cards FROM board_state WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
-        if (boardResult.rows.length > 0) {
-            const cards = boardResult.rows[0].cards;
-            if (!cards.find((c) => c.id === statementCardId)) {
-                cards.push({
-                    id: statementCardId,
-                    type: 'theory',
-                    x: 100 + Math.random() * 400,
-                    y: 100 + Math.random() * 400,
-                    label: `${suspectId.replace('_', ' ')}: "${node.text.slice(0, 30)}..."`
-                });
-                await (0, db_1.query)('UPDATE board_state SET cards = $1 WHERE user_id = $2 AND case_id = $3', [JSON.stringify(cards), userId, caseId]);
-            }
+        // Track statement in world state seen dialogues
+        if (!ws.seen_dialogues) {
+            ws.seen_dialogues = {};
         }
-        // Register unlocked dialogue key
-        const updatedUnlockedDialogues = [...progress.unlocked_dialogues];
-        if (!updatedUnlockedDialogues.includes(statementCardId)) {
-            updatedUnlockedDialogues.push(statementCardId);
+        ws.seen_dialogues[statementCardId] = true;
+        const board = await getBoardState(userId, caseId);
+        if (!board.nodes.find((n) => n.id === statementCardId)) {
+            board.nodes.push({
+                id: statementCardId,
+                type: 'theory',
+                label: `${suspectId.toUpperCase()} Statement: "${node.text.slice(0, 30)}..."`,
+                x: 100 + Math.random() * 400,
+                y: 100 + Math.random() * 400
+            });
+            await saveBoardState(userId, caseId, board.nodes, board.edges);
         }
+        // Save elapsed time
+        const timeCost = 5;
         const updatedTime = progress.elapsed_time + timeCost;
         await (0, db_1.query)(`UPDATE user_progress 
-       SET unlocked_dialogues = $1, inventory = $2, discovered_evidence = $3, elapsed_time = $4
-       WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(updatedUnlockedDialogues), JSON.stringify(updatedInventory), JSON.stringify(updatedEvidence), updatedTime, userId, caseId]);
+       SET world_state = $1, elapsed_time = $2
+       WHERE user_id = $3 AND case_id = $4`, [JSON.stringify(ws), updatedTime, userId, caseId]);
         res.json({
-            node,
+            node: {
+                ...node,
+                choices: filteredChoices
+            },
             timeElapsed: timeCost,
             current_time: updatedTime
         });
@@ -426,7 +421,7 @@ router.post('/:caseId/dialogue', auth_1.authenticateToken, async (req, res, next
         next(error);
     }
 });
-// 6. Cross-Examine (Contradiction Check)
+// 6. Cross-Examine (Contradiction Stamp)
 router.post('/:caseId/cross-examine', auth_1.authenticateToken, async (req, res, next) => {
     const { caseId } = req.params;
     const { statementId, evidenceId } = req.body;
@@ -437,84 +432,75 @@ router.post('/:caseId/cross-examine', auth_1.authenticateToken, async (req, res,
             return res.status(404).json({ error: 'Case not started' });
         }
         const progress = progressResult.rows[0];
-        const dialoguesConfig = loadCaseJSON(caseId, 'dialogues');
-        // Parse statement ID: e.g. "james_holloway_statement_james_alibi_tea"
-        // format: [suspect]_[name]_statement_[node]
-        const match = statementId.match(/^([a-z_]+)_statement_([a-z_]+)$/);
-        if (!match) {
-            return res.status(400).json({ error: 'Invalid statement selection' });
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        // Find if contradiction is defined in contradiction.json
+        const contradictionsConfig = caseData.contradictions;
+        if (!contradictionsConfig) {
+            return res.status(400).json({ error: 'Contradiction stamps not supported for this case.' });
         }
+        // Match statement ID: suspect_statement_nodeKey
+        const match = statementId.match(/^([a-z_]+)_statement_([a-z_]+)$/);
+        if (!match)
+            return res.status(400).json({ error: 'Invalid statement tack' });
         const suspectId = match[1];
         const nodeKey = match[2];
-        const suspectDialogues = dialoguesConfig[suspectId];
-        const node = suspectDialogues?.[nodeKey];
-        // Check if statement has a contradiction mapping matching this evidence
-        if (node && node.contradicts && node.contradicts[evidenceId]) {
-            const contradictionId = node.contradicts[evidenceId];
-            const updatedContradictions = [...progress.discovered_contradictions];
-            let newUnlock = false;
-            if (!updatedContradictions.includes(contradictionId)) {
-                updatedContradictions.push(contradictionId);
-                newUnlock = true;
-                // If contradiction is james_hallway_lie, unlock James hallway confront dialogue!
-                const updatedUnlockedDialogues = [...progress.unlocked_dialogues];
-                if (contradictionId === 'james_hallway_lie') {
-                    // James hallway confront route is unlocked
-                }
-                // Add contradiction card to board
-                const boardResult = await (0, db_1.query)('SELECT cards FROM board_state WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
-                if (boardResult.rows.length > 0) {
-                    const cards = boardResult.rows[0].cards;
-                    if (!cards.find((c) => c.id === contradictionId)) {
-                        cards.push({
-                            id: contradictionId,
-                            type: 'evidence',
-                            x: 200,
-                            y: 200,
-                            label: `🚨 CONTRADICTION EXPOSED: ${contradictionId.replace(/_/g, ' ').toUpperCase()}`
-                        });
-                        await (0, db_1.query)('UPDATE board_state SET cards = $1 WHERE user_id = $2 AND case_id = $3', [JSON.stringify(cards), userId, caseId]);
-                    }
-                }
-                // Add Sherlock Journal thought
-                let journalContent = '';
-                if (contradictionId === 'james_hallway_lie') {
-                    journalContent = `James claimed he spent the entire night in the kitchen. Yet motion sensors place him right in the study hallway at 10:00 PM. He is hiding something. I must confront him.`;
-                }
-                else if (contradictionId === 'victor_gate_lie') {
-                    journalContent = `Victor Hayes claimed he was asleep at home in Elmwood. But security gate logs record his license plate entering at 9:55 PM and departing at 10:15 PM. His alibi is shattered. He was at the manor at the time of death.`;
-                }
-                else if (contradictionId === 'eleanor_will_lie') {
-                    journalContent = `Eleanor claimed they had a stable marriage. But the new will draft reveals Arthur cut her out entirely, and she was planning a divorce. She had a strong motive.`;
-                }
-                else if (contradictionId === 'daniel_will_motive') {
-                    journalContent = `Daniel claimed he didn't care about Arthur's assets. But the draft will shows he was being completely disinherited. That argument yesterday makes perfect sense now.`;
-                }
-                await (0, db_1.query)(`INSERT INTO journal_entries (user_id, case_id, title, content, is_system, pinned)
-           VALUES ($1, $2, 'Contradiction: ' || $3, $4, true, false)`, [userId, caseId, contradictionId.replace(/_/g, ' '), journalContent]);
-                // Save progress
-                await (0, db_1.query)('UPDATE user_progress SET discovered_contradictions = $1 WHERE user_id = $2 AND case_id = $3', [JSON.stringify(updatedContradictions), userId, caseId]);
+        const dialogueNode = caseData.dialogues[suspectId]?.[nodeKey];
+        // Check if dialogue conflicts with selected evidence
+        // Old contradiction mappings: is mapped in dialogueNode.contradicts[evidenceId]
+        let contradictionId = '';
+        if (dialogueNode && dialogueNode.contradicts && dialogueNode.contradicts[evidenceId]) {
+            contradictionId = dialogueNode.contradicts[evidenceId];
+        }
+        else {
+            // Direct comparison with contradiction.json keys
+            // Check if statement maps to key
+            const key = `${suspectId}_${nodeKey}_vs_${evidenceId}`;
+            if (contradictionsConfig[key] || contradictionsConfig[contradictionId]) {
+                contradictionId = key;
             }
+        }
+        if (contradictionId && contradictionsConfig[contradictionId]) {
+            const contradiction = contradictionsConfig[contradictionId];
+            const ws = { ...progress.world_state };
+            // Set contradiction flag in world state
+            ws[contradictionId] = true;
+            // Add contradiction card to corkboard
+            const board = await getBoardState(userId, caseId);
+            if (!board.nodes.find((n) => n.id === contradictionId)) {
+                board.nodes.push({
+                    id: contradictionId,
+                    type: 'evidence',
+                    label: `🚨 CONTRADICTION: ${contradiction.title}`,
+                    x: 200,
+                    y: 200
+                });
+                await saveBoardState(userId, caseId, board.nodes, board.edges);
+            }
+            // Add Sherlock Thought Journal entry
+            const journalTitle = `Contradiction Exposed: ${contradiction.title}`;
+            await (0, db_1.query)(`INSERT INTO journal_entries (user_id, case_id, title, content, is_system, pinned)
+         VALUES ($1, $2, $3, $4, true, false)`, [userId, caseId, journalTitle, contradiction.description]);
+            // Save back to DB
+            await (0, db_1.query)(`UPDATE user_progress SET world_state = $1 WHERE user_id = $2 AND case_id = $3`, [JSON.stringify(ws), userId, caseId]);
             return res.json({
                 success: true,
                 contradictionId,
-                newUnlock,
-                message: '🚨 CONTRADICTION EXPOSED! A new lead has been recorded on the board.'
+                message: `🚨 CONTRADICTION EXPOSED: ${contradiction.title}!`
             });
         }
         res.json({
             success: false,
-            message: 'This connection yields no immediate contradictions. "These details don\'t seem to clash..."'
+            message: 'This connection yields no immediate contradictions.'
         });
     }
     catch (error) {
         next(error);
     }
 });
-// 7. Accusation & Case Evaluation (6 Variables presented in slots)
-router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) => {
-    const { caseId } = req.params;
-    const { culprit, weapon, motive, method, timeOfDeath, supportingEvidence } = req.body;
+// 7. Generic Puzzle Solve Controller
+router.post('/:caseId/puzzles/:puzzleId/solve', auth_1.authenticateToken, async (req, res, next) => {
+    const { caseId, puzzleId } = req.params;
+    const { answer } = req.body;
     const userId = req.user?.id;
     try {
         const progressResult = await (0, db_1.query)('SELECT * FROM user_progress WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
@@ -522,38 +508,110 @@ router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) 
             return res.status(404).json({ error: 'Case not started' });
         }
         const progress = progressResult.rows[0];
-        const endingsConfig = loadCaseJSON(caseId, 'endings');
-        // 1. Evaluate Culprit
-        const isCulpritCorrect = culprit === endingsConfig.culprit;
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        // Find puzzle definition
+        const puzzle = caseData.puzzles[puzzleId];
+        if (!puzzle) {
+            return res.status(404).json({ error: 'Puzzle configuration not found.' });
+        }
+        // Verify requirements
+        const meetsRequirements = game_1.RequirementEngine.checkRequirements(puzzle.requirements, progress.world_state, progress.inventory, progress.discovered_evidence, progress.completed_puzzles);
+        if (!meetsRequirements) {
+            return res.status(403).json({ error: 'Puzzle is currently locked.' });
+        }
+        // Verify answer via PuzzleRegistry verifiers
+        const isCorrect = game_1.PuzzleRegistry.verify(puzzle.type, answer, puzzle);
+        if (!isCorrect) {
+            return res.json({ success: false, message: 'Solution is incorrect. The gears grind, but do not unlock...' });
+        }
+        // Mutate state references
+        const ws = { ...progress.world_state };
+        const inv = [...progress.inventory];
+        const ev = [...progress.discovered_evidence];
+        const puz = [...progress.completed_puzzles];
+        if (!puz.includes(puzzleId)) {
+            puz.push(puzzleId);
+        }
+        // Execute rewards
+        const rewardResult = game_1.EffectEngine.executeEffects(puzzle.rewards, ws, inv, ev, puz);
+        // Pin reward cards to board if returned
+        if (rewardResult.newCards.length > 0) {
+            const board = await getBoardState(userId, caseId);
+            rewardResult.newCards.forEach((card) => {
+                if (!board.nodes.find((n) => n.id === card.id)) {
+                    board.nodes.push(card);
+                }
+            });
+            await saveBoardState(userId, caseId, board.nodes, board.edges);
+        }
+        // Process puzzle solved trigger
+        const triggerResult = game_1.TriggerEngine.evaluateTriggers(puzzleId + '_solved', caseData.triggers, ws, inv, ev, puz);
+        if (triggerResult.newCards.length > 0) {
+            const board = await getBoardState(userId, caseId);
+            triggerResult.newCards.forEach((card) => {
+                if (!board.nodes.find((n) => n.id === card.id)) {
+                    board.nodes.push(card);
+                }
+            });
+            await saveBoardState(userId, caseId, board.nodes, board.edges);
+        }
+        // Save back to DB
+        await (0, db_1.query)(`UPDATE user_progress 
+       SET world_state = $1, inventory = $2, discovered_evidence = $3, completed_puzzles = $4
+       WHERE user_id = $5 AND case_id = $6`, [JSON.stringify(ws), JSON.stringify(inv), JSON.stringify(ev), JSON.stringify(puz), userId, caseId]);
+        res.json({
+            success: true,
+            message: `🎉 PUZZLE SOLVED: ${puzzle.title} restored!`,
+            rewards: puzzle.rewards
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+// 8. Accuse & Courtroom Presentation Table (Object-based slots verification)
+router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) => {
+    const { caseId } = req.params;
+    const playerAccusations = req.body; // e.g. { killer: "victor_hayes", weapon: "vial" }
+    const userId = req.user?.id;
+    try {
+        const progressResult = await (0, db_1.query)('SELECT * FROM user_progress WHERE user_id = $1 AND case_id = $2', [userId, caseId]);
+        if (progressResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Case not started' });
+        }
+        const progress = progressResult.rows[0];
+        const caseData = game_1.CaseLoader.loadCase(caseId);
+        const endingsConfig = caseData.endings;
+        // Verify accusatorial slots object-by-object
+        let correctCount = 0;
+        const requiredSlots = endingsConfig.required; // array of {slot, correct}
+        requiredSlots.forEach((reqSlot) => {
+            const playerVal = playerAccusations[reqSlot.slot];
+            if (playerVal && playerVal.trim() === reqSlot.correct.trim()) {
+                correctCount++;
+            }
+        });
+        const isAllCorrect = correctCount === requiredSlots.length;
         let endingId = 'wrong_culprit';
         let finalScore = 0;
-        if (isCulpritCorrect) {
-            // Check presented core evidence
-            const correctEvidencePresented = supportingEvidence.filter((clueId) => endingsConfig.core_evidence.includes(clueId));
-            const allCoreEvidencePresent = correctEvidencePresented.length === endingsConfig.core_evidence.length;
-            const isWeaponCorrect = weapon === endingsConfig.weapon;
-            const isMotiveCorrect = motive === endingsConfig.motive;
-            const isMethodCorrect = method === endingsConfig.method;
-            const isTimeCorrect = timeOfDeath === endingsConfig.time_of_death;
-            if (isWeaponCorrect && isMotiveCorrect && isMethodCorrect && isTimeCorrect && allCoreEvidencePresent) {
-                endingId = 'conviction_true';
-                finalScore = 100;
-            }
-            else if (correctEvidencePresented.length >= 2 && (isWeaponCorrect || isMotiveCorrect)) {
-                endingId = 'weak_evidence';
-                finalScore = 50;
-            }
-            else {
-                endingId = 'insufficient_evidence';
-                finalScore = 25;
-            }
+        if (isAllCorrect) {
+            endingId = 'conviction_true';
+            finalScore = 100;
         }
-        // Deduct score for hints used or excessive time spent
-        const timeDeduction = Math.floor(progress.elapsed_time / 30) * 5; // -5 points for every 30 mins
-        const hintDeduction = progress.hints_used * 10; // -10 points per hint
+        else if (correctCount >= 2) {
+            endingId = 'weak_evidence';
+            finalScore = 50;
+        }
+        else {
+            endingId = 'insufficient_evidence';
+            finalScore = 25;
+        }
+        // Apply time deductions
+        const timeDeduction = Math.floor(progress.elapsed_time / 30) * 5;
+        const hintDeduction = progress.hints_used * 10;
         finalScore = Math.max(10, finalScore - timeDeduction - hintDeduction);
         const ending = endingsConfig.endings[endingId];
-        // Update case completed status
+        // Mark completed
         await (0, db_1.query)(`UPDATE user_progress 
        SET completed = true, score = $1, ending_reached = $2
        WHERE user_id = $3 AND case_id = $4`, [finalScore, endingId, userId, caseId]);
@@ -568,7 +626,7 @@ router.post('/:caseId/accuse', auth_1.authenticateToken, async (req, res, next) 
                 timeSpentMinutes: progress.elapsed_time,
                 hintsUsed: progress.hints_used,
                 cluesDiscovered: progress.discovered_evidence.length,
-                contradictionsFound: progress.discovered_contradictions.length
+                completedPuzzlesCount: progress.completed_puzzles.length
             }
         });
     }

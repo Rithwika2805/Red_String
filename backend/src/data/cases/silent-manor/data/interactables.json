@@ -1,0 +1,154 @@
+{
+  "study": {
+    "desk": {
+      "name": "Arthur's Desk",
+      "description": "Arthur Blackwood's personal mahogany writing desk. A green desk lamp casts a dim light.",
+      "nodes": {
+        "glass": {
+          "name": "Spilled Red Wine Glass",
+          "description": "A crystal wine glass lies spilled. Red wine has pooled on the desk blotter.",
+          "evidence_reward": "spilled_wine_glass",
+          "cost_minutes": 5
+        },
+        "drawer": {
+          "name": "Mahogany Drawer",
+          "description": "A locked side drawer on the desk. Needs a key.",
+          "locked": true,
+          "requires_key": "pantry_key",
+          "evidence_reward": "will_draft",
+          "cost_minutes": 10
+        },
+        "phone": {
+          "name": "Arthur's Smartphone",
+          "description": "An iPhone with a cracked screen. On the home screen is an unread text message: 'We know what you did. The thread is pulling.'",
+          "evidence_reward": "arthurs_smartphone",
+          "cost_minutes": 10
+        }
+      }
+    },
+    "fireplace": {
+      "name": "Stone Fireplace",
+      "description": "A massive carved stone fireplace. Embers are cold.",
+      "nodes": {
+        "ash": {
+          "name": "Burnt Paper Scrap",
+          "description": "A scrap of partially charred ledger page recovered from the ashes. It reads: 'Blackwood Holdings ... Transferred to VH ... $1,200,000'.",
+          "evidence_reward": "burnt_ledger_page",
+          "cost_minutes": 10
+        }
+      }
+    },
+    "cabinet": {
+      "name": "Display Cabinet",
+      "description": "A glass display cabinet containing decorative antiques.",
+      "nodes": {
+        "cabinet_lock": {
+          "name": "Torn Ledger Page",
+          "description": "A financial log showing suspicious offshore wire transactions to bank routing coordinates linked to VH.",
+          "evidence_reward": "financial_logs",
+          "cost_minutes": 15
+        }
+      }
+    },
+    "floor": {
+      "name": "Study Floor",
+      "description": "The Persian rug beneath Arthur's desk.",
+      "nodes": {
+        "footprint": {
+          "name": "Muddy Shoeprint",
+          "description": "A faint shoeprint left in mud on the wooden floor near the window, matching sizing associated with Victor Hayes.",
+          "evidence_reward": "muddy_shoeprint",
+          "cost_minutes": 5
+        }
+      }
+    }
+  },
+  "kitchen": {
+    "counter": {
+      "name": "Kitchen Counter",
+      "description": "A stainless steel kitchen counter covered with prep items.",
+      "nodes": {
+        "coffee_cup": {
+          "name": "Stained Coffee Cup",
+          "description": "A porcelain coffee cup with faint lipstick marks matching Olivia's profile.",
+          "evidence_reward": "stained_coffee_mug",
+          "cost_minutes": 5
+        }
+      }
+    },
+    "pantry": {
+      "name": "Pantry Shelves",
+      "description": "Shelves stocked with canned goods and spices.",
+      "nodes": {
+        "pantry_key": {
+          "name": "Brass Cabinet Key",
+          "description": "A heavy brass key stored inside a container labeled 'Flour'. Unlocks the desk drawer in Arthur's study.",
+          "inventory_reward": "pantry_key",
+          "cost_minutes": 15
+        }
+      }
+    }
+  },
+  "gardens": {
+    "flowerbed": {
+      "name": "Flowerbed near Study Window",
+      "description": "A flowerbed outside the study window, heavily trampled.",
+      "nodes": {
+        "footprints": {
+          "name": "Trampled Mud Footprints",
+          "description": "Deep impressions of boots in the mud near the window ledges. Matches Victor's shoes.",
+          "evidence_reward": "trampled_footprints",
+          "cost_minutes": 10
+        }
+      }
+    }
+  },
+  "security_room": {
+    "computer": {
+      "name": "Security Computer",
+      "description": "The main security monitoring terminal. Requires a login password.",
+      "locked": true,
+      "requires_password": "1003",
+      "nodes": {
+        "gate_logs": {
+          "name": "Gate Entry Log",
+          "description": "Security logs showing Victor Hayes's vehicle scanned entering the estate gate at 10:45 PM and departing at 11:35 PM.",
+          "evidence_reward": "gate_entry_logs",
+          "cost_minutes": 10
+        },
+        "hall_logs": {
+          "name": "Corridor Feed logs",
+          "description": "Camera logs showing a hooded figure walking down the study corridor at 11:10 PM.",
+          "evidence_reward": "hallway_video",
+          "cost_minutes": 10
+        }
+      }
+    },
+    "whiteboard": {
+      "name": "Security Noticeboard",
+      "description": "A cork board with staff duties and schedules.",
+      "nodes": {
+        "password_note": {
+          "name": "Noticeboard Note",
+          "description": "A sticky note pinned to the board reads: 'System maintenance login: 1003'.",
+          "evidence_reward": "security_whiteboard",
+          "cost_minutes": 5
+        }
+      }
+    }
+  },
+  "studio": {
+    "easel": {
+      "name": "Work Easel",
+      "description": "A tall wooden easel showing a half-finished abstract canvas.",
+      "nodes": {
+        "canvas": {
+          "name": "Sophia's Painting",
+          "description": "An oil painting depicting a bleeding figure on a desk. Creepily resembles Arthur's final pose.",
+          "evidence_reward": "sophias_painting",
+          "cost_minutes": 15
+        }
+      }
+    }
+  }
+}

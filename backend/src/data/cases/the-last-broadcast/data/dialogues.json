@@ -1,0 +1,115 @@
+{
+  "producer": {
+    "root": {
+      "text": "Miller: I had nothing to do with Elena's death. Yes, she was a headache, but she made our ratings skyrocket! We were planning a mock assassination attempt to drive up publicity. That's why the cameras cut.",
+      "choices": [
+        {
+          "text": "Confront about keycard access swiped at 10:02 PM",
+          "next": "confront_keycard",
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "gate_keycard_logs" }
+            ]
+          }
+        },
+        {
+          "text": "Ask about insurance payouts",
+          "next": "insurance_motive"
+        }
+      ]
+    },
+    "confront_keycard": {
+      "text": "Miller: (Sweating) Okay, fine! I did swipe into the corridor at 10:02 PM. But only to verify if the cables were cut! Elena was already dead by then. I ran away because I didn't want to get blamed!",
+      "effect": "confront_producer"
+    },
+    "insurance_motive": {
+      "text": "Miller: Of course the network had insurance. But a murder trial is a PR disaster, not a payout. Julian was the one who stood to gain her executive producer chair."
+    }
+  },
+  "camera_op": {
+    "root": {
+      "text": "Henderson: Look, I was fired yesterday because Elena found out I was taking kickbacks. I was mad, yes. I threatened her. But I wasn't even in the building. I was drinking at the Coffee Shop.",
+      "choices": [
+        {
+          "text": "Check alibi",
+          "next": "alibi_check"
+        }
+      ]
+    },
+    "alibi_check": {
+      "text": "Henderson: The bartender remembers me. Ask them. I'm a loud drinker. I wouldn't waste my time cutting camera lenses anyway."
+    }
+  },
+  "politician": {
+    "root": {
+      "text": "Senator Sterling: I am a public servant. Elena Voss ran a defamatory segment about me, but I handle my disputes in court, not in dark studios. I was at home in Elmwood all night.",
+      "choices": [
+        {
+          "text": "Confront with garage receipt stub (stamped 9:55 PM)",
+          "next": "confront_garage",
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "parking_receipt" }
+            ]
+          }
+        }
+      ]
+    },
+    "confront_garage": {
+      "text": "Senator Sterling: (Frowning) ...My driver must have used that garage. I was not in the vehicle. This is an intrusion on my privacy.",
+      "effect": "confront_politician"
+    }
+  },
+  "journalist": {
+    "root": {
+      "text": "Julian Cole: Elena and I were partners. Yes, we had creative differences, but she was a brilliant journalist. I was in my dressing room preparing my notes during the broadcast. I never saw her tonight.",
+      "choices": [
+        {
+          "text": "Confront about fingerprint on Elena's coffee mug",
+          "next": "confront_fingerprint",
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "fingerprint_mug" }
+            ]
+          }
+        }
+      ]
+    },
+    "confront_fingerprint": {
+      "text": "Julian Cole: (Sighs) I brought her coffee at 9:50 PM. We had a brief discussion about the show timeline. She was nervous. But she was perfectly fine when I left her."
+    }
+  },
+  "security_chief": {
+    "root": {
+      "text": "Vance: I run security. The broadcast cameras cut because of a main transformer power grid failure at 10:00 PM. No backup generators kicked in due to a relay fuse pop.",
+      "choices": [
+        {
+          "text": "Confront with server power logs (no power grid failure)",
+          "next": "confront_power",
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "server_power_logs" }
+            ]
+          }
+        },
+        {
+          "text": "Confront with restored audio tape threat",
+          "next": "confront_audio",
+          "requires": {
+            "all": [
+              { "type": "evidence", "id": "audio_restored" }
+            ]
+          }
+        }
+      ]
+    },
+    "confront_power": {
+      "text": "Vance: (Stares coldly) Server logs can be corrupted. Main grids are tricky. I stand by my report.",
+      "effect": "confront_chief"
+    },
+    "confront_audio": {
+      "text": "Vance: ...That tape is a fabrication. Voss was digging into matters that didn't concern her. You are playing a dangerous game, detective. Walk away.",
+      "effect": "confront_chief"
+    }
+  }
+}

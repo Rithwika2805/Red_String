@@ -1,0 +1,33 @@
+{
+  "id": "timeline_voss",
+  "type": "timeline",
+  "title": "Surveillance Timeline Reconstruction",
+  "difficulty": 3,
+  "requirements": {
+    "all": [
+      { "type": "evidence", "id": "server_power_logs" }
+    ]
+  },
+  "rewards": [
+    { "action": "set", "path": "world_state.timeline_solved", "value": true },
+    { "action": "unlock_evidence", "id": "delayed_surveillance" },
+    {
+      "action": "board_card",
+      "card": {
+        "id": "delayed_surveillance",
+        "type": "evidence",
+        "label": "Clue: 14-Minute Delayed Video",
+        "x": 300,
+        "y": 250
+      }
+    }
+  ],
+  "data": {
+    "events": [
+      { "id": "camera_cut", "display": "Camera Feed Lost", "shownTime": "9:46 PM", "realTime": "10:00 PM" },
+      { "id": "mug_shatters", "display": "Coffee Mug Shatters", "shownTime": "9:55 PM", "realTime": "10:09 PM" },
+      { "id": "chief_enters", "display": "Security Chief Swipes Entry", "shownTime": "9:58 PM", "realTime": "10:12 PM" },
+      { "id": "voss_dies", "display": "Elena Voss Watch Stops", "shownTime": "10:00 PM", "realTime": "10:14 PM" }
+    ]
+  }
+}

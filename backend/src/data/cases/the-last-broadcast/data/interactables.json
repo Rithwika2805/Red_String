@@ -1,0 +1,144 @@
+{
+  "tv_studio": {
+    "presenter_desk": {
+      "name": "Presenter Desk",
+      "description": "Elena Voss's mahogany desk. Overturned coffee mug, notepad, and mic.",
+      "nodes": {
+        "overturned_chair": {
+          "name": "Overturned Chair",
+          "description": "The chair is pushed backward violently, implying a sudden struggle.",
+          "evidence_reward": "overturned_chair",
+          "cost_minutes": 5
+        },
+        "shattered_mug": {
+          "name": "Shattered Mug",
+          "description": "Elena's coffee mug lies shattered on the floor. Dregs of coffee spilled.",
+          "evidence_reward": "shattered_coffee_mug",
+          "cost_minutes": 10
+        },
+        "notebook": {
+          "name": "Reporter Notebook",
+          "description": "Elena's notebook contains references to missing files and a security code note: 'PC Code: 1003'",
+          "evidence_reward": "voss_notebook",
+          "cost_minutes": 15
+        },
+        "strange_symbol": {
+          "name": "Under-desk Symbol",
+          "description": "Scribbled under the desk wood is a hand-drawn emblem: a circle intersected by a red thread.",
+          "evidence_reward": "strange_symbol",
+          "cost_minutes": 5
+        }
+      }
+    },
+    "scaffolding_herring": {
+      "name": "Studio Scaffolding",
+      "description": "The metal scaffolding holding up the spot lights. Everything is in order; nothing of interest.",
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "studio_floor": {
+      "name": "Studio Floor",
+      "description": "The concrete floor surrounding the cameras.",
+      "nodes": {
+        "lens": {
+          "name": "Shattered Camera Lens",
+          "description": "The glass lens of Studio Camera 2 is smashed, as if kicked during a scuffle.",
+          "evidence_reward": "shattered_camera_lens",
+          "cost_minutes": 10
+        },
+        "blood_trail": {
+          "name": "Faint Blood Trail",
+          "description": "A drop of blood on the concrete floor, leading from the desk to the main exit door.",
+          "evidence_reward": "blood_trail",
+          "cost_minutes": 10
+        }
+      }
+    }
+  },
+  "editing_room": {
+    "console": {
+      "name": "Editing Console",
+      "description": "Control panel for video mixers and feeds. On it sits a tape recorder.",
+      "nodes": {
+        "tape_recorder": {
+          "name": "Corrupted Audio Tape",
+          "description": "A tape recorder containing Elena's final interview tape, but the file is corrupted. Rearranging the blocks in Analysis might restore it.",
+          "evidence_reward": "corrupted_audio_tape",
+          "cost_minutes": 10
+        }
+      }
+    },
+    "monitors_herring": {
+      "name": "Monitor Panel",
+      "description": "A grid of monitors showing empty broadcasting rooms. Nothing of interest here.",
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "server_room": {
+    "servers": {
+      "name": "Server Racks",
+      "description": "Humming server columns hosting security logs.",
+      "nodes": {
+        "power_logs": {
+          "name": "Station Power Logs",
+          "description": "System log files indicating there was never a power cut in the station, only a manual recording freeze.",
+          "evidence_reward": "server_power_logs",
+          "cost_minutes": 15
+        },
+        "keycard_logs": {
+          "name": "Studio A Keycard Logs",
+          "description": "Access logs indicating the Producer's keycard was swiped at 10:02 PM, and the Security Chief's master key card swiped at 10:12 PM.",
+          "evidence_reward": "gate_keycard_logs",
+          "cost_minutes": 15
+        }
+      }
+    },
+    "keycard_panel_herring": {
+      "name": "Telecom Switchboard",
+      "description": "Bundles of Ethernet cables routing local desk phones. Nothing of value to the murder.",
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "parking_garage": {
+    "spot_12": {
+      "name": "Parking Spot 12",
+      "description": "Spot 12 is designated for TV guests.",
+      "nodes": {
+        "parking_receipt": {
+          "name": "Discarded Receipt",
+          "description": "A parking ticket stub dated today, stamped at 9:55 PM and departing at 10:15 PM.",
+          "evidence_reward": "parking_receipt",
+          "cost_minutes": 10
+        }
+      }
+    },
+    "gate_receipt_herring": {
+      "name": "Trash Bin",
+      "description": "A plastic bin near the parking elevator. Contains empty soda cans and coffee cups. Nothing of interest.",
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "elena_apartment": {
+    "loft_desk": {
+      "name": "Loft Desk",
+      "description": "Elena Voss's desk with notebooks and a drawer.",
+      "nodes": {
+        "usb_flash_drive": {
+          "name": "Encrypted Flash Drive",
+          "description": "A silver USB flash drive found in her desk drawer. It is password encrypted.",
+          "inventory_reward": "red_string_flashdrive",
+          "cost_minutes": 15
+        }
+      }
+    },
+    "bookshelf_herring": {
+      "name": "Messy Bookshelf",
+      "description": "Dozens of textbooks on law, investigative journalism, and financial crime. Nothing of interest to the murder.",
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "required": [
+    { "slot": "killer", "correct": "security_chief" },
+    { "slot": "method", "correct": "medical_injector" },
+    { "slot": "weapon", "correct": "modified_injector" },
+    { "slot": "time", "correct": "10:14_pm" }
+  ],
+  "endings": {
+    "conviction_true": {
+      "title": "Justice for Voss",
+      "rating": "A+",
+      "description": "You successfully convict Security Chief Marcus Vance. You demonstrate how he remotely disabled the studio door locks to trap Elena, injected poison through a modified medical injector disguised as emergency equipment, and delayed the TV monitors by 14 minutes to fabricate his alibi. The case is closed... but Vance refuses to name the network behind 'Project Red String'."
+    },
+    "weak_evidence": {
+      "title": "Unsubstantiated Conspiracy",
+      "rating": "C",
+      "description": "You accuse Marcus Vance, but without the time calculations and delay logs, the prosecution fails to bypass his 14-minute alibi. The Chief is released due to lack of evidence, and the station shuts down."
+    },
+    "wrong_culprit": {
+      "title": "Slandered Reputation",
+      "rating": "F",
+      "description": "You accuse the Producer or Politician. The courtroom quickly dismisses your theory as keycard records and parking slips show they were not in the studio corridor when Elena died. The true killer goes free, and you are fired from the force."
+    },
+    "insufficient_evidence": {
+      "title": "Mistrial",
+      "rating": "D",
+      "description": "You present the culprit, but fail to establish the correct method or weapon. The jury is deadlocked, resulting in a mistrial."
+    }
+  }
+}

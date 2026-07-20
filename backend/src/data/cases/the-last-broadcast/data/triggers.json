@@ -1,0 +1,36 @@
+[
+  {
+    "trigger": "timeline_solved",
+    "effects": [
+      { "action": "set", "path": "world_state.timeline_solved", "value": true },
+      { "action": "unlock_evidence", "id": "delayed_surveillance" },
+      {
+        "action": "board_card",
+        "card": {
+          "id": "delayed_surveillance",
+          "type": "evidence",
+          "label": "Clue: 14-Minute Delayed Video",
+          "x": 300,
+          "y": 250
+        }
+      }
+    ]
+  },
+  {
+    "trigger": "audio_solved",
+    "effects": [
+      { "action": "set", "path": "world_state.audio_solved", "value": true },
+      { "action": "unlock_evidence", "id": "audio_restored" },
+      {
+        "action": "board_card",
+        "card": {
+          "id": "audio_restored",
+          "type": "evidence",
+          "label": "Clue: Decrypted Audio Tape",
+          "x": 400,
+          "y": 250
+        }
+      }
+    ]
+  }
+]

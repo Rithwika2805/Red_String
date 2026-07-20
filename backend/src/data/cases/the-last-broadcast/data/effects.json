@@ -1,0 +1,13 @@
+{
+  "confront_producer": [
+    { "action": "set", "path": "world_state.producer_confronted", "value": true },
+    { "action": "increment", "path": "world_state.trust.producer", "value": -1 }
+  ],
+  "confront_chief": [
+    { "action": "set", "path": "world_state.chief_confronted", "value": true },
+    { "action": "increment", "path": "world_state.trust.chief", "value": -2 }
+  ],
+  "confront_politician": [
+    { "action": "set", "path": "world_state.politician_confronted", "value": true }
+  ]
+}

@@ -3,8 +3,8 @@ import { useGame, Card, Connection } from '../context/GameContext';
 import { X, ZoomIn, ZoomOut, Maximize2, Trash2, Edit3, Link2, PlusCircle } from 'lucide-react';
 import useZoomPan from '../hooks/useZoomPan';
 
-export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { boardState, updateBoardState, activeCaseId, triggerAudio } = useGame();
+export const Board: React.FC<{ onClose: () => void; isEmbedded?: boolean }> = ({ onClose, isEmbedded = false }) => {
+  const { boardState, updateBoardState, activeCaseId, triggerAudio, showAlert, showConfirm, showPrompt } = useGame();
   
   const {
     zoom,
@@ -96,7 +96,7 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   // Connection Creation
-  const handleCardLinkClick = (e: React.MouseEvent, cardId: string) => {
+  const handleCardLinkClick = async (e: React.MouseEvent, cardId: string) => {
     e.stopPropagation();
     if (linkingSourceId) {
       if (linkingSourceId === cardId) {
@@ -111,14 +111,14 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       );
 
       if (exists) {
-        alert('A connection already exists between these nodes.');
+        showAlert('A connection already exists between these nodes.');
         setLinkingSourceId(null);
         return;
       }
 
       // Add connection
-      const note = prompt('Enter a notes/theory for this connection (optional):') || '';
-      const color = prompt('Choose connection color (red, blue, green):') || 'red';
+      const note = (await showPrompt('Enter a notes/theory for this connection (optional):')) || '';
+      const color = (await showPrompt('Choose connection color (red, blue, green):', 'red')) || 'red';
 
       const newConn: Connection = {
         id: `conn_${Date.now()}`,
@@ -156,11 +156,11 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
-  const editConnectionNote = (connId: string) => {
+  const editConnectionNote = async (connId: string) => {
     const conn = connections.find(c => c.id === connId);
     if (!conn) return;
 
-    const newNote = prompt('Edit connection notes:', conn.note);
+    const newNote = await showPrompt('Edit connection notes:', conn.note);
     if (newNote === null) return;
 
     const updated = connections.map(c => 
@@ -202,13 +202,13 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
-  const handleDeleteCard = (cardId: string) => {
+  const handleDeleteCard = async (cardId: string) => {
     if (!cardId.startsWith('theory_')) {
-      alert('Only custom theories/speculations can be deleted from the board. Core clues are immutable.');
+      showAlert('Only custom theories/speculations can be deleted from the board. Core clues are immutable.');
       return;
     }
-    const confirm = window.confirm('Delete this theory card and all associated links?');
-    if (!confirm) return;
+    const confirmDelete = await showConfirm('Delete this theory card and all associated links?');
+    if (!confirmDelete) return;
 
     const updatedCards = cards.filter(c => c.id !== cardId);
     const updatedConnections = connections.filter(c => c.sourceId !== cardId && c.targetId !== cardId);
@@ -223,7 +223,7 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute inset-0 bg-wood-950/95 z-40 flex flex-col backdrop-blur-md">
+    <div className={isEmbedded ? "w-full h-full flex flex-col relative bg-wood-950/90" : "absolute inset-0 bg-wood-950/95 z-40 flex flex-col backdrop-blur-md"}>
       
       {/* Top Controller HUD */}
       <div className="w-full bg-noir-900 border-b border-wood-800 px-6 py-3 flex justify-between items-center z-55">
@@ -257,11 +257,14 @@ export const Board: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <Maximize2 className="w-4 h-4" />
           </button>
 
-          <div className="h-6 w-px bg-wood-800 mx-2" />
-
-          <button onClick={onClose} className="p-1.5 bg-crimson hover:bg-red-700 rounded text-white transition">
-            <X className="w-4 h-4" />
-          </button>
+          {!isEmbedded && (
+            <>
+              <div className="h-6 w-px bg-wood-800 mx-2" />
+              <button onClick={onClose} className="p-1.5 bg-crimson hover:bg-red-700 rounded text-white transition">
+                <X className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 

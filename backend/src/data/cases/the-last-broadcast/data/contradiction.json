@@ -1,0 +1,18 @@
+{
+  "producer_gate_lie": {
+    "title": "Producer's Keycard swipe",
+    "description": "Producer claimed he spent the entire broadcast in the control room and never swiped keycard, but Studio A keycard logs trace swipe at 10:02 PM."
+  },
+  "chief_power_lie": {
+    "title": "Chief's Power Cut Claim",
+    "description": "Security Chief claimed power grid failure shut cameras, but server logs prove station power never failed—someone manually disabled feeds."
+  },
+  "politician_garage_lie": {
+    "title": "Politician's Building Entry",
+    "description": "Politician claimed he was miles away from the station, but a parking ticket receipt stub registers his vehicle entering the garage at 9:55 PM."
+  },
+  "journalist_mug_fingerprint": {
+    "title": "Journalist's Coffee Swipe",
+    "description": "Fellow journalist claimed he never met Elena tonight, but his fresh fingerprints are mapped on her shattered coffee mug."
+  }
+}

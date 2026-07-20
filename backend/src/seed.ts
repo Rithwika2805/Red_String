@@ -1,20 +1,33 @@
 import fs from 'fs';
 import path from 'path';
 import { pool } from './config/db';
+import { CaseLoader } from './game/loader/CaseLoader';
 
 const seedDatabase = async () => {
-  console.log('🌱 Starting database initialization...');
+  console.log('🌱 Starting database validation and initialization...');
   try {
+    // 1. Validate all case folders with Zod schemas
+    console.log('Validating case configurations...');
+    const cases = CaseLoader.listCases();
+    console.log(`Found ${cases.length} cases to validate.`);
+    
+    for (const caseMeta of cases) {
+      console.log(`Validating case: "${caseMeta.id}" (${caseMeta.title})...`);
+      const loaded = CaseLoader.loadCase(caseMeta.id);
+      console.log(`✅ Case "${caseMeta.id}" is valid! Manifest Version: ${loaded.manifest.version}`);
+    }
+
+    // 2. Execute schema.sql
     const schemaPath = path.join(__dirname, 'models', 'schema.sql');
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
-    console.log('Executing schema.sql...');
+    console.log('Executing database schema.sql...');
     await pool.query(schemaSql);
     console.log('✅ Database schema initialized successfully!');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error initializing database:', error);
+    console.error('❌ Error during validation or database seeding:', error);
     process.exit(1);
   }
 };

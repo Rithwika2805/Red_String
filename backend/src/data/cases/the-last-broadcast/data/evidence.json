@@ -1,0 +1,80 @@
+{
+  "overturned_chair": {
+    "title": "Overturned Presenter Chair",
+    "description": "Elena's desk chair was pushed back violently, indicating a sudden scuffle or struggle.",
+    "location": "TV Studio A",
+    "tags": ["Physical", "Forensic"]
+  },
+  "shattered_coffee_mug": {
+    "title": "Shattered Coffee Mug",
+    "description": "Elena's favorite mug lay broken on the floor. Stained with coffee and fresh fingerprints.",
+    "location": "TV Studio A",
+    "tags": ["Physical", "Forensic"]
+  },
+  "voss_notebook": {
+    "title": "Reporter Notebook",
+    "description": "Contains Elena's notes about local corruption, and a scribble: 'PC Code: 1003'.",
+    "location": "TV Studio A",
+    "tags": ["Document", "Timeline"]
+  },
+  "strange_symbol": {
+    "title": "Under-desk Symbol",
+    "description": "A mysterious circle intersected by a red thread, hand-drawn under Elena's desk.",
+    "location": "TV Studio A",
+    "tags": ["Symbolic"]
+  },
+  "shattered_camera_lens": {
+    "title": "Shattered Camera Lens",
+    "description": "Glass lens of Studio Camera 2 is smashed, suggesting a physical conflict on set.",
+    "location": "TV Studio A",
+    "tags": ["Physical"]
+  },
+  "blood_trail": {
+    "title": "Faint Blood Trail",
+    "description": "Small droplets of blood leading from the presenter desk toward the studio main exit.",
+    "location": "TV Studio A",
+    "tags": ["Forensic"]
+  },
+  "corrupted_audio_tape": {
+    "title": "Corrupted Audio Tape",
+    "description": "A tape recorder containing Elena's final broadcast recording, heavily corrupted.",
+    "location": "Editing Suite",
+    "tags": ["Digital", "Audio"]
+  },
+  "server_power_logs": {
+    "title": "Station Power Logs",
+    "description": "Server log entries proving that station power never fluctuated; the feeds were manual freezes.",
+    "location": "Server Hub",
+    "tags": ["Digital", "Timeline"]
+  },
+  "gate_keycard_logs": {
+    "title": "Studio A Keycard Logs",
+    "description": "Traces keycard entry logs: Producer swiped at 10:02 PM, Security Chief at 10:12 PM.",
+    "location": "Server Hub",
+    "tags": ["Digital", "Timeline"]
+  },
+  "parking_receipt": {
+    "title": "Discarded Parking Receipt",
+    "description": "A ticket stub stamped entry at 9:55 PM and departure at 10:15 PM, matching a politician's car.",
+    "location": "Parking lot Spot 12",
+    "tags": ["Physical", "Timeline"]
+  },
+  "audio_restored": {
+    "title": "Restored Tape Dialogue",
+    "description": "Restored audio recording: Elena confronting Vance about Project Red String and receiving threats.",
+    "location": "Analysis Suite",
+    "tags": ["Restored", "Audio"]
+  },
+  "project_red_string_clue": {
+    "title": "Project Red String Photo Link",
+    "description": "Decrypted contents containing details of the shadow network connecting Blackwood and Voss.",
+    "location": "Analysis Suite",
+    "tags": ["Decrypted", "Document"]
+  },
+  "delayed_surveillance": {
+    "title": "14-Minute Delayed Video",
+    "description": "Corrected timeline proving the live monitor feed was delayed by 14 minutes.",
+    "location": "Analysis Suite",
+    "tags": ["Restored", "Timeline"]
+  }
+}

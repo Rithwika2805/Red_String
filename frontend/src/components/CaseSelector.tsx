@@ -14,7 +14,7 @@ interface CaseItem {
 
 export const CaseSelector: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { token } = useAuth();
-  const { startCase, activeCaseId, fetchProgress } = useGame();
+  const { startCase, activeCaseId, fetchProgress, showConfirm } = useGame();
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
@@ -48,7 +48,7 @@ export const CaseSelector: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       if (success) onClose();
     } else {
       if (activeCaseId) {
-        const confirmReset = window.confirm(
+        const confirmReset = await showConfirm(
           'Warning: Starting a new case will clear your current board and progress. Do you wish to proceed?'
         );
         if (!confirmReset) return;

@@ -1,0 +1,27 @@
+{
+  "tv_studio": {
+    "name": "TV Studio A",
+    "description": "The main broadcasting set where Elena Voss was presenting. Lighting scaffolding, spotlight rigs, and cameras face the presenter desk.",
+    "bg_image": "/assets/scenes/tv_studio.jpg"
+  },
+  "editing_room": {
+    "name": "Editing Suite",
+    "description": "A dark console room with sound-absorbing walls, mixers, and video monitors used to queue live feeds.",
+    "bg_image": "/assets/scenes/editing_room.jpg"
+  },
+  "server_room": {
+    "name": "Server & Telecoms Room",
+    "description": "Cold, humming servers housing the station's network logs, backup recordings, and keycard control systems.",
+    "bg_image": "/assets/scenes/server_room.jpg"
+  },
+  "parking_garage": {
+    "name": "Underground Parking",
+    "description": "A concrete basement structure with parking stalls. Wet tire tracks trace a route from the entryway.",
+    "bg_image": "/assets/scenes/parking_garage.jpg"
+  },
+  "elena_apartment": {
+    "name": "Elena's Apartment",
+    "description": "Elena's personal loft. Notebooks, books, and boards show her recent corruption investigations.",
+    "bg_image": "/assets/scenes/elena_apartment.jpg"
+  }
+}

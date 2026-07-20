@@ -1,0 +1,118 @@
+{
+  "study": {
+    "desk": {
+      "name": "Arthur's Desk",
+      "hotspot": { "x": 20, "y": 45, "w": 40, "h": 35 }
+    },
+    "fireplace": {
+      "name": "Stone Fireplace",
+      "hotspot": { "x": 70, "y": 40, "w": 25, "h": 50 }
+    },
+    "cabinet": {
+      "name": "Display Cabinet",
+      "hotspot": { "x": 5, "y": 30, "w": 18, "h": 55 }
+    },
+    "floor": {
+      "name": "Study Floor",
+      "hotspot": { "x": 30, "y": 80, "w": 35, "h": 15 }
+    },
+    "bookshelf_herring": {
+      "name": "Oak Bookshelf",
+      "hotspot": { "x": 48, "y": 15, "w": 20, "h": 40 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "portrait_herring": {
+      "name": "Victorian Portrait",
+      "hotspot": { "x": 25, "y": 10, "w": 15, "h": 20 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "window_herring": {
+      "name": "Rainy Window",
+      "hotspot": { "x": 0, "y": 15, "w": 15, "h": 50 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "kitchen": {
+    "counter": {
+      "name": "Kitchen Counter",
+      "hotspot": { "x": 10, "y": 45, "w": 50, "h": 45 }
+    },
+    "pantry": {
+      "name": "Pantry Shelves",
+      "hotspot": { "x": 68, "y": 20, "w": 28, "h": 70 }
+    },
+    "sink_herring": {
+      "name": "Stainless Sink",
+      "hotspot": { "x": 0, "y": 45, "w": 15, "h": 30 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "stove_herring": {
+      "name": "Gas Stove",
+      "hotspot": { "x": 35, "y": 35, "w": 22, "h": 28 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "gardens": {
+    "flowerbed": {
+      "name": "Flowerbed near Study Window",
+      "hotspot": { "x": 5, "y": 65, "w": 40, "h": 30 }
+    },
+    "fountain_herring": {
+      "name": "Stone Fountain",
+      "hotspot": { "x": 52, "y": 50, "w": 25, "h": 35 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "gate_herring": {
+      "name": "Iron Gate",
+      "hotspot": { "x": 80, "y": 20, "w": 18, "h": 70 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "security_room": {
+    "computer": {
+      "name": "Security Computer",
+      "hotspot": { "x": 20, "y": 45, "w": 45, "h": 45 }
+    },
+    "whiteboard": {
+      "name": "Security Noticeboard",
+      "hotspot": { "x": 72, "y": 25, "w": 22, "h": 40 }
+    },
+    "monitor_herring": {
+      "name": "Surveillance Monitors",
+      "hotspot": { "x": 10, "y": 10, "w": 60, "h": 32 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "locker_herring": {
+      "name": "Staff Lockers",
+      "hotspot": { "x": 0, "y": 20, "w": 12, "h": 75 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  },
+  "studio": {
+    "easel": {
+      "name": "Work Easel",
+      "hotspot": { "x": 30, "y": 15, "w": 38, "h": 75 }
+    },
+    "palette_herring": {
+      "name": "Paint Palette",
+      "hotspot": { "x": 12, "y": 55, "w": 20, "h": 35 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    },
+    "couch_herring": {
+      "name": "Velvet Couch",
+      "hotspot": { "x": 72, "y": 50, "w": 26, "h": 40 },
+      "is_red_herring": true,
+      "cost_minutes": 2
+    }
+  }
+}

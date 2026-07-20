@@ -1,0 +1,30 @@
+{
+  "id": "decrypt_flashdrive",
+  "type": "terminal",
+  "title": "USB Decryption Terminal",
+  "difficulty": 3,
+  "requirements": {
+    "all": [
+      { "type": "inventory", "id": "red_string_flashdrive" }
+    ]
+  },
+  "rewards": [
+    { "action": "set", "path": "world_state.flashdrive_decrypted", "value": true },
+    { "action": "unlock_evidence", "id": "project_red_string_clue" },
+    {
+      "action": "board_card",
+      "card": {
+        "id": "project_red_string_clue",
+        "type": "evidence",
+        "label": "Clue: Project Red String Photo Link",
+        "x": 200,
+        "y": 400
+      }
+    }
+  ],
+  "data": {
+    "password": "1003",
+    "reward": "project_red_string_folder",
+    "fileContents": "PROJECT RED STRING\nKnown Members: 0\nKnown Victims: 2 (Arthur Blackwood, Elena Voss)\nKnown Objective: Unknown\n\nNotes: Elena's investigation documents a massive invisible conspiracy networks mapping doctors, judges, and estate heirs. Arthur Blackwood (Ch 1) and Elena Voss (Ch 2) were both connected by a handwritten red line. They were killed by the same shadow ring."
+  }
+}
